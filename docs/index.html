@@ -1,0 +1,279 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Privacy-Friendly Maps – Shortcode Builder</title>
+  <style>
+    :root {
+      color-scheme: light dark;
+      font-family: "Inter", "Segoe UI", system-ui, -apple-system, BlinkMacSystemFont, sans-serif;
+    }
+    body {
+      margin: 0;
+      padding: 2rem 1.5rem 4rem 1.5rem;
+      background: radial-gradient(circle at top, rgba(59,130,246,0.25), transparent 55%), var(--page-bg, #0f172a);
+      color: #e2e8f0;
+      min-height: 100vh;
+    }
+    main {
+      max-width: 1100px;
+      margin: 0 auto;
+      background: rgba(15,23,42,0.65);
+      border-radius: 24px;
+      padding: 2.5rem;
+      box-shadow: 0 30px 70px -40px rgba(15,23,42,0.8);
+      backdrop-filter: blur(12px);
+    }
+    h1 {
+      margin-top: 0;
+      font-size: clamp(2.2rem, 2vw + 2rem, 3.2rem);
+      line-height: 1.1;
+      color: #f8fafc;
+    }
+    p.lead {
+      font-size: 1.25rem;
+      max-width: 48rem;
+      color: rgba(226,232,240,0.85);
+    }
+    form {
+      display: grid;
+      gap: 1rem;
+      margin-top: 2rem;
+    }
+    fieldset {
+      border: 1px solid rgba(148,163,184,0.45);
+      border-radius: 1rem;
+      padding: 1.5rem;
+      background: rgba(15,23,42,0.65);
+      display: grid;
+      gap: 1rem;
+    }
+    label {
+      display: grid;
+      gap: 0.4rem;
+      font-weight: 600;
+      color: #bfdbfe;
+    }
+    input[type="text"],
+    input[type="number"],
+    textarea {
+      border-radius: 0.75rem;
+      border: 1px solid rgba(148,163,184,0.45);
+      background: rgba(15,23,42,0.55);
+      color: inherit;
+      padding: 0.75rem 1rem;
+      font-size: 1rem;
+      resize: vertical;
+      min-height: 3rem;
+    }
+    textarea {
+      min-height: 6rem;
+    }
+    .builder {
+      display: grid;
+      gap: 2rem;
+      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+      align-items: start;
+      margin-top: 2.5rem;
+    }
+    .preview-card {
+      background: rgba(15,23,42,0.55);
+      border-radius: 1.5rem;
+      padding: 1.5rem;
+      border: 1px solid rgba(148,163,184,0.35);
+      display: grid;
+      gap: 1rem;
+    }
+    .preview-card iframe,
+    .preview-card img {
+      width: 100%;
+      border-radius: 1rem;
+      border: 0;
+    }
+    .preview-card picture {
+      display: block;
+      width: 100%;
+    }
+    .status {
+      padding: 1rem 1.25rem;
+      border-radius: 0.85rem;
+      background: rgba(15,118,110,0.25);
+      color: #99f6e4;
+      font-weight: 600;
+    }
+    .status.error {
+      background: rgba(220,38,38,0.22);
+      color: #fecaca;
+    }
+    code {
+      font-family: "SFMono-Regular", "Fira Code", "Cascadia Code", monospace;
+      background: rgba(15,23,42,0.55);
+      padding: 0.25rem 0.55rem;
+      border-radius: 0.5rem;
+    }
+    a {
+      color: #93c5fd;
+    }
+    footer {
+      margin-top: 3rem;
+      font-size: 0.9rem;
+      color: rgba(226,232,240,0.75);
+    }
+  </style>
+</head>
+<body>
+  <main>
+    <h1>Privacy-Friendly Maps shortcode builder</h1>
+    <p class="lead">Experiment with coordinates, zoom levels, and preview styles before pasting the shortcode into Micro.blog. No information leaves your browser &mdash; everything happens locally.</p>
+
+    <section class="builder">
+      <form id="map-form" autocomplete="off">
+        <fieldset>
+          <legend>Location</legend>
+          <label>
+            Latitude
+            <input type="number" id="lat" name="lat" step="0.000001" value="48.135125" aria-describedby="status" required>
+          </label>
+          <label>
+            Longitude
+            <input type="number" id="lng" name="lng" step="0.000001" value="11.581981" required>
+          </label>
+          <label>
+            Zoom level (0&ndash;19)
+            <input type="number" id="zoom" name="zoom" min="0" max="19" value="14">
+          </label>
+        </fieldset>
+        <fieldset>
+          <legend>Static preview (optional)</legend>
+          <label>
+            Geoapify API key
+            <input type="text" id="apiKey" name="apiKey" placeholder="Paste your key to preview static maps">
+          </label>
+          <label>
+            Base style
+            <input type="text" id="styleBase" name="styleBase" value="osm-carto" placeholder="osm-carto">
+          </label>
+          <label>
+            Light mode style
+            <input type="text" id="styleLight" name="styleLight" placeholder="Defaults to base">
+          </label>
+          <label>
+            Dark mode style
+            <input type="text" id="styleDark" name="styleDark" placeholder="Defaults to base">
+          </label>
+        </fieldset>
+        <fieldset>
+          <legend>Privacy notice</legend>
+          <label>
+            Notice text
+            <textarea id="noticeText" name="noticeText">We only load OpenStreetMap after you click the preview.</textarea>
+          </label>
+        </fieldset>
+      </form>
+      <div class="preview-card">
+        <div id="status" class="status" role="status">Ready to generate shortcode.</div>
+        <label>
+          Shortcode
+          <textarea id="shortcode" readonly spellcheck="false"></textarea>
+        </label>
+        <div>
+          <strong>Static preview</strong>
+          <picture id="staticPreview" hidden>
+            <source id="staticDark" media="(prefers-color-scheme: dark)">
+            <source id="staticLight" media="(prefers-color-scheme: light)">
+            <img id="staticImage" loading="lazy" decoding="async" alt="Static map preview">
+          </picture>
+          <p id="staticFallback" hidden><em>Add your Geoapify API key to render the static preview.</em></p>
+        </div>
+        <div>
+          <strong>Interactive embed</strong>
+          <iframe id="mapFrame" loading="lazy" referrerpolicy="no-referrer" title="OpenStreetMap preview" allowfullscreen></iframe>
+        </div>
+      </div>
+    </section>
+
+    <footer>
+      Built for <a href="https://www.micro.blog/">Micro.blog</a>. Static map images are generated on demand via Geoapify if you provide an API key. Interactive maps use the official OpenStreetMap embed with lazy loading and a strict referrer policy.
+    </footer>
+  </main>
+  <script>
+    const form = document.getElementById('map-form');
+    const shortcodeField = document.getElementById('shortcode');
+    const statusEl = document.getElementById('status');
+    const frame = document.getElementById('mapFrame');
+    const staticPreview = document.getElementById('staticPreview');
+    const staticImage = document.getElementById('staticImage');
+    const staticLight = document.getElementById('staticLight');
+    const staticDark = document.getElementById('staticDark');
+    const staticFallback = document.getElementById('staticFallback');
+
+    const clamp = (value, min, max) => Math.min(Math.max(value, min), max);
+
+    function makeStaticUrl(style, lat, lng, zoom, apiKey, retina = false) {
+      const width = retina ? 1536 : 768;
+      const height = retina ? 864 : 432;
+      const encodedStyle = encodeURIComponent(style || 'osm-carto');
+      const marker = encodeURIComponent(`lonlat:${lng.toFixed(6)},${lat.toFixed(6)};type:awesome;color:%23dd2e44;size:medium`);
+      return `https://maps.geoapify.com/v1/staticmap?style=${encodedStyle}&width=${width}&height=${height}&center=lonlat:${lng.toFixed(6)},${lat.toFixed(6)}&zoom=${zoom}&marker=${marker}&apiKey=${encodeURIComponent(apiKey)}`;
+    }
+
+    function updatePreview() {
+      const lat = parseFloat(form.lat.value);
+      const lng = parseFloat(form.lng.value);
+      const zoom = parseInt(form.zoom.value, 10);
+      const apiKey = form.apiKey.value.trim();
+      const styleBase = form.styleBase.value.trim() || 'osm-carto';
+      const styleLight = form.styleLight.value.trim() || styleBase;
+      const styleDark = form.styleDark.value.trim() || styleBase;
+      const noticeText = form.noticeText.value.trim();
+
+      if (!Number.isFinite(lat) || !Number.isFinite(lng)) {
+        statusEl.textContent = 'Please provide valid decimal coordinates.';
+        statusEl.classList.add('error');
+        shortcodeField.value = '';
+        return;
+      }
+
+      const safeZoom = Number.isFinite(zoom) ? clamp(zoom, 0, 19) : 14;
+      statusEl.classList.remove('error');
+      statusEl.textContent = 'Shortcode generated successfully.';
+
+      const zoomFragment = safeZoom !== 14 ? ` zoom="${safeZoom}"` : '';
+      shortcodeField.value = `{{< map loc="${lat.toFixed(6)},${lng.toFixed(6)}"${zoomFragment} >}}`;
+
+      const worldDegrees = 360 / Math.pow(2, safeZoom);
+      const widthDegrees = worldDegrees * (768 / 256);
+      const heightDegrees = worldDegrees * (432 / 256);
+      const halfWidth = widthDegrees / 2;
+      const halfHeight = heightDegrees / 2;
+      const left = clamp(lng - halfWidth, -180, 180);
+      const right = clamp(lng + halfWidth, -180, 180);
+      const bottom = clamp(lat - halfHeight, -85.051129, 85.051129);
+      const top = clamp(lat + halfHeight, -85.051129, 85.051129);
+
+      frame.src = `https://www.openstreetmap.org/export/embed.html?bbox=${left.toFixed(6)},${bottom.toFixed(6)},${right.toFixed(6)},${top.toFixed(6)}&layer=mapnik&marker=${lat.toFixed(6)},${lng.toFixed(6)}`;
+      frame.title = `OpenStreetMap preview for ${lat.toFixed(6)}, ${lng.toFixed(6)}`;
+
+      if (apiKey) {
+        staticFallback.hidden = true;
+        staticPreview.hidden = false;
+        staticImage.src = makeStaticUrl(styleBase, lat, lng, safeZoom, apiKey, false);
+        staticImage.srcset = `${makeStaticUrl(styleBase, lat, lng, safeZoom, apiKey, false)} 1x, ${makeStaticUrl(styleBase, lat, lng, safeZoom, apiKey, true)} 2x`;
+        staticLight.srcset = `${makeStaticUrl(styleLight, lat, lng, safeZoom, apiKey, false)} 1x, ${makeStaticUrl(styleLight, lat, lng, safeZoom, apiKey, true)} 2x`;
+        staticDark.srcset = `${makeStaticUrl(styleDark, lat, lng, safeZoom, apiKey, false)} 1x, ${makeStaticUrl(styleDark, lat, lng, safeZoom, apiKey, true)} 2x`;
+      } else {
+        staticPreview.hidden = true;
+        staticFallback.hidden = false;
+      }
+
+      if (noticeText) {
+        staticFallback.dataset.notice = noticeText;
+      }
+    }
+
+    form.addEventListener('input', updatePreview);
+    document.addEventListener('DOMContentLoaded', updatePreview);
+  </script>
+</body>
+</html>

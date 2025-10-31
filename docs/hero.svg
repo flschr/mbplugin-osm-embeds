@@ -1,0 +1,48 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1280 640" role="img" aria-labelledby="title desc">
+  <title id="title">Privacy-Friendly Maps hero graphic</title>
+  <desc id="desc">Minimal illustration showing a privacy badge layered over a stylised map.</desc>
+  <defs>
+    <linearGradient id="bg" x1="0%" x2="100%" y1="0%" y2="100%">
+      <stop offset="0%" stop-color="#0f172a" />
+      <stop offset="100%" stop-color="#1d4ed8" />
+    </linearGradient>
+    <linearGradient id="grid" x1="0%" x2="100%" y1="0%" y2="100%">
+      <stop offset="0%" stop-color="rgba(226,232,240,0.9)" />
+      <stop offset="100%" stop-color="rgba(226,232,240,0.4)" />
+    </linearGradient>
+    <linearGradient id="badge" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stop-color="#22d3ee" />
+      <stop offset="100%" stop-color="#0ea5e9" />
+    </linearGradient>
+    <filter id="shadow" x="-10%" y="-10%" width="120%" height="120%">
+      <feDropShadow dx="0" dy="18" stdDeviation="24" flood-color="rgba(15,23,42,0.5)" />
+    </filter>
+  </defs>
+  <rect width="1280" height="640" fill="url(#bg)" />
+  <g fill="none" stroke="url(#grid)" stroke-width="3">
+    <path d="M160 96L1120 96" />
+    <path d="M160 192L1120 192" />
+    <path d="M160 288L1120 288" />
+    <path d="M160 384L1120 384" />
+    <path d="M160 480L1120 480" />
+    <path d="M160 576L1120 576" />
+    <path d="M224 48L224 592" />
+    <path d="M416 48L416 592" />
+    <path d="M608 48L608 592" />
+    <path d="M800 48L800 592" />
+    <path d="M992 48L992 592" />
+  </g>
+  <g filter="url(#shadow)">
+    <rect x="320" y="144" width="640" height="352" rx="48" fill="rgba(15,23,42,0.75)" stroke="rgba(96,165,250,0.85)" stroke-width="6" />
+    <path d="M384 208h512v32H384zm0 88h256v32H384zm0 88h384v32H384z" fill="rgba(226,232,240,0.6)" />
+  </g>
+  <g filter="url(#shadow)">
+    <path d="M872 320c0-88.365-71.635-160-160-160s-160 71.635-160 160 71.635 160 160 160 160-71.635 160-160z" fill="rgba(14,116,144,0.85)" />
+    <path d="M712 224l64 64 80-80 32 32-112 112-96-96z" fill="#f8fafc" />
+  </g>
+  <g filter="url(#shadow)">
+    <path d="M444 512l84 84 84-84h-48v-72h-72v72h-48z" fill="url(#badge)" />
+  </g>
+  <text x="360" y="112" font-family="'Segoe UI', system-ui, sans-serif" font-size="56" fill="#e2e8f0" font-weight="700">Privacy-Friendly Maps for Micro.blog</text>
+  <text x="360" y="560" font-family="'Segoe UI', system-ui, sans-serif" font-size="32" fill="#bae6fd">OpenStreetMap embeds without compromising your readers' privacy</text>
+</svg>
