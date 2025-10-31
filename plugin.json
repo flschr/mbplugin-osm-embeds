@@ -1,0 +1,16 @@
+{
+  "name": "mbplugin-map",
+  "title": "Privacy-Friendly Maps",
+  "description": "Embed OpenStreetMap views with an optional Geoapify static preview – no JavaScript required.",
+  "author": "OpenAI (ChatGPT)",
+  "version": "1.0.0",
+  "params": {
+    "map_preview_api_key": "",
+    "default_map_zoom": "14",
+    "map_preview_style": "osm-carto",
+    "map_preview_style_light": "osm-carto",
+    "map_preview_style_dark": "osm-carto",
+    "show_privacy_notice": true,
+    "map_privacy_notice_text": "We only load OpenStreetMap after you click the preview."
+  }
+}
