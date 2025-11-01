@@ -6,22 +6,16 @@
   "version": "5.0.1",
   "fields": [
     {
-      "field": "params.show_privacy_notice",
-      "label": "Show privacy notice",
+      "field": "params.privacy_mode",
+      "label": "Privacy mode",
       "type": "boolean",
       "default": true
     },
     {
       "field": "params.map_privacy_notice_text",
-      "label": "Privacy notice text",
+      "label": "Privacy notice text (if empty, button will be shown)",
       "type": "string",
-      "default": "We only load OpenStreetMap after you interact with the preview."
-    },
-    {
-      "field": "params.show_map_button",
-      "label": "Show map button",
-      "type": "boolean",
-      "default": true
+      "default": ""
     },
     {
       "field": "params.map_button_text",
