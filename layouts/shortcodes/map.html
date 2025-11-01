@@ -131,6 +131,19 @@
   {{- $showPrivacyNotice := $previewConfig.Get "showPrivacyNotice" -}}
   {{- $privacyNoticeText := printf "%v" (or .Site.Params.map_privacy_notice_text "We only load OpenStreetMap after you interact with the preview.") -}}
 
+  {{- /* Button configuration */ -}}
+  {{- $previewConfig.Set "showButton" true -}}
+  {{- with .Site.Params.show_map_button -}}
+    {{- $buttonRaw := lower (trim (printf "%v" .) " ") -}}
+    {{- if in (slice "false" "0" "no") $buttonRaw -}}
+      {{- $previewConfig.Set "showButton" false -}}
+    {{- else if in (slice "true" "1" "yes") $buttonRaw -}}
+      {{- $previewConfig.Set "showButton" true -}}
+    {{- end -}}
+  {{- end -}}
+  {{- $showButton := $previewConfig.Get "showButton" -}}
+  {{- $buttonText := printf "%v" (or .Site.Params.map_button_text "Interactive Map") -}}
+
   {{- /* Feed output uses only the static preview or a fallback link */ -}}
   {{- if $isFeed -}}
     {{- if and $hasPreview (ne (trim $apiKey "") "") -}}
@@ -217,6 +230,18 @@
             radial-gradient(circle at 80% 30%, rgba(59, 130, 246, 0.55), transparent 60%),
             linear-gradient(135deg, rgba(14, 116, 144, 0.7), rgba(30, 64, 175, 0.8));
         }
+        .mb-map-privacy-notice {
+          position: absolute;
+          bottom: 0;
+          left: 0;
+          right: 0;
+          background: rgba(0, 0, 0, 0.75);
+          color: #ffffff;
+          padding: 0.75rem 1rem;
+          font-size: 0.875rem;
+          line-height: 1.4;
+          text-align: center;
+        }
         .mb-map-overlay {
           position: absolute;
           bottom: 1.5rem;
@@ -225,20 +250,8 @@
           align-items: center;
           justify-content: center;
         }
-        .mb-map-overlay__action {
-          display: inline-flex;
-          align-items: center;
-          gap: 0.5rem;
-          padding: 0.75rem 1.5rem;
-          background: rgba(255, 255, 255, 0.95);
-          color: #1e3a8a;
-          font-weight: 600;
-          font-size: 0.875rem;
-          letter-spacing: 0.025em;
-        }
-        .mb-map-overlay__action:hover {
-          background: #3b82f6;
-          color: #ffffff;
+        .mb-map-preview--with-notice .mb-map-overlay {
+          bottom: 4rem;
         }
         .mb-map-preview label:focus-visible {
           outline: 3px solid rgba(14, 165, 233, 0.75);
@@ -291,16 +304,21 @@
       {{- if $hasPreview -}}
         {{- /* With API key: show preview with toggle */ -}}
         <input type="checkbox" id="{{ $toggleID }}" class="mb-map-toggle" aria-describedby="{{ $hintID }}" />
-        <div class="mb-map-preview">
+        <div class="mb-map-preview{{ if $showPrivacyNotice }} mb-map-preview--with-notice{{ end }}">
           <label for="{{ $toggleID }}">
             <picture>
               <source media="(prefers-color-scheme: dark)" srcset="{{ $darkPreview | safeURL }} 1x, {{ $darkPreview2x | safeURL }} 2x" />
               <source media="(prefers-color-scheme: light)" srcset="{{ $lightPreview | safeURL }} 1x, {{ $lightPreview2x | safeURL }} 2x" />
               <img src="{{ $lightPreview | safeURL }}" srcset="{{ $lightPreview | safeURL }} 1x, {{ $lightPreview2x | safeURL }} 2x" alt="Static map preview at {{ $latFormatted }}, {{ $lngFormatted }}" width="768" height="432" loading="lazy" decoding="async" />
             </picture>
-            <div class="mb-map-overlay">
-              <span class="mb-map-overlay__action">Interactive Map</span>
-            </div>
+            {{- if $showPrivacyNotice -}}
+              <div class="mb-map-privacy-notice">{{ $privacyNoticeText }}</div>
+            {{- end -}}
+            {{- if $showButton -}}
+              <div class="mb-map-overlay">
+                <span class="button">{{ $buttonText }}</span>
+              </div>
+            {{- end -}}
           </label>
         </div>
         <div class="mb-map-canvas mb-map-canvas--deferred">
