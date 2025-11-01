@@ -344,19 +344,31 @@
           document.querySelectorAll('.mb-map-preview-content').forEach(function(content) {
             var img = content.querySelector('img');
             if (img) {
-              if (img.complete && img.naturalHeight !== 0) {
+              var showContent = function() {
                 content.classList.add('loaded');
                 var placeholder = content.previousElementSibling;
                 if (placeholder && placeholder.classList.contains('mb-map-loading-placeholder')) {
                   placeholder.style.display = 'none';
                 }
+              };
+
+              // Set a timeout to show content even if image doesn't load
+              var timeout = setTimeout(function() {
+                showContent();
+              }, 3000);
+
+              if (img.complete && img.naturalHeight !== 0) {
+                clearTimeout(timeout);
+                showContent();
               } else {
                 img.addEventListener('load', function() {
-                  content.classList.add('loaded');
-                  var placeholder = content.previousElementSibling;
-                  if (placeholder && placeholder.classList.contains('mb-map-loading-placeholder')) {
-                    placeholder.style.display = 'none';
-                  }
+                  clearTimeout(timeout);
+                  showContent();
+                });
+
+                img.addEventListener('error', function() {
+                  clearTimeout(timeout);
+                  showContent();
                 });
               }
             }
