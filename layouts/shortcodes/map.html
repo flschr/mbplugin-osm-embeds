@@ -223,33 +223,31 @@
         }
         .mb-map-overlay {
           position: absolute;
-          inset: 0;
-          display: grid;
-          place-items: center;
-          padding: 1.5rem;
-          text-align: center;
-          background: linear-gradient(180deg, rgba(15, 23, 42, 0.55), rgba(15, 23, 42, 0.75));
-          color: #f8fafc;
-        }
-        .mb-map-overlay__text {
-          font-size: 1rem;
-          line-height: 1.5;
-          margin-bottom: 0.75rem;
+          bottom: 1.5rem;
+          right: 1.5rem;
+          display: flex;
+          align-items: center;
+          justify-content: center;
         }
         .mb-map-overlay__action {
           display: inline-flex;
           align-items: center;
           gap: 0.5rem;
-          padding: 0.55rem 1rem;
+          padding: 0.75rem 1.5rem;
           border-radius: 999px;
-          background: rgba(255, 255, 255, 0.15);
-          color: inherit;
+          background: rgba(255, 255, 255, 0.95);
+          color: #1e3a8a;
           font-weight: 600;
-          text-transform: uppercase;
-          letter-spacing: 0.06em;
+          font-size: 0.875rem;
+          letter-spacing: 0.025em;
+          box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+          transition: all 200ms ease;
         }
-        .mb-map-preview label:hover .mb-map-overlay {
-          background: linear-gradient(180deg, rgba(59, 130, 246, 0.55), rgba(30, 64, 175, 0.85));
+        .mb-map-preview label:hover .mb-map-overlay__action {
+          background: #3b82f6;
+          color: #ffffff;
+          transform: translateY(-2px);
+          box-shadow: 0 6px 16px rgba(59, 130, 246, 0.4);
         }
         .mb-map-preview label:focus-visible {
           outline: 3px solid rgba(14, 165, 233, 0.75);
@@ -336,23 +334,18 @@
               <img src="{{ $lightPreview | safeURL }}" srcset="{{ $lightPreview | safeURL }} 1x, {{ $lightPreview2x | safeURL }} 2x" alt="Static map preview at {{ $latFormatted }}, {{ $lngFormatted }}" width="768" height="432" loading="lazy" decoding="async" />
             </picture>
             <div class="mb-map-overlay">
-              {{- if $showPrivacyNotice -}}
-                <span class="mb-map-overlay__text">{{ $privacyNoticeText | htmlEscape }}</span>
-              {{- end -}}
-              <span class="mb-map-overlay__action">Activate map</span>
+              <span class="mb-map-overlay__action">Interactive Map</span>
             </div>
           </label>
         </div>
         <div class="mb-map-canvas mb-map-canvas--deferred">
           <iframe src="{{ $iframeURL | safeURL }}" loading="lazy" referrerpolicy="no-referrer" allowfullscreen title="OpenStreetMap map view" aria-label="Interactive OpenStreetMap view for {{ $latFormatted }}, {{ $lngFormatted }}"></iframe>
         </div>
-        <p class="mb-map-hint" id="{{ $hintID }}">Coordinates: {{ $latFormatted }}, {{ $lngFormatted }} · Zoom {{ $zoomString }}.{{ if $showPrivacyNotice }} {{ $privacyNoticeText | htmlEscape }}{{ else }} The map loads on demand to protect your privacy.{{ end }}</p>
       {{- else -}}
         {{- /* Without API key: show map directly */ -}}
         <div class="mb-map-canvas">
           <iframe src="{{ $iframeURL | safeURL }}" loading="lazy" referrerpolicy="no-referrer" allowfullscreen title="OpenStreetMap map view" aria-label="Interactive OpenStreetMap view for {{ $latFormatted }}, {{ $lngFormatted }}"></iframe>
         </div>
-        <p class="mb-map-hint">Coordinates: {{ $latFormatted }}, {{ $lngFormatted }} · Zoom {{ $zoomString }}.</p>
       {{- end -}}
     </div>
   {{- end -}}
