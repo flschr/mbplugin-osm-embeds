@@ -113,15 +113,15 @@
   {{- $styleDark := $previewConfig.Get "styleDark" -}}
 
   {{- $previewBase := "https://maps.geoapify.com/v1/staticmap" -}}
-  {{- $markerQuery := printf "lonlat:%s,%s;type:awesome;color:#dd2e44;size:medium" $lngFormatted $latFormatted -}}
+  {{- $markerQuery := printf "lonlat:%s,%s;type:awesome;color:#dd2e44;size:large" $lngFormatted $latFormatted -}}
   {{- $lightPreview := printf "%s?style=%s&width=768&height=432&center=lonlat:%s,%s&zoom=%s&marker=%s&apiKey=%s" $previewBase (urlquery $styleLight) $lngFormatted $latFormatted $zoomString (urlquery $markerQuery) $apiKey -}}
   {{- $lightPreview2x := printf "%s?style=%s&width=1536&height=864&center=lonlat:%s,%s&zoom=%s&marker=%s&apiKey=%s" $previewBase (urlquery $styleLight) $lngFormatted $latFormatted $zoomString (urlquery $markerQuery) $apiKey -}}
   {{- $darkPreview := printf "%s?style=%s&width=768&height=432&center=lonlat:%s,%s&zoom=%s&marker=%s&apiKey=%s" $previewBase (urlquery $styleDark) $lngFormatted $latFormatted $zoomString (urlquery $markerQuery) $apiKey -}}
   {{- $darkPreview2x := printf "%s?style=%s&width=1536&height=864&center=lonlat:%s,%s&zoom=%s&marker=%s&apiKey=%s" $previewBase (urlquery $styleDark) $lngFormatted $latFormatted $zoomString (urlquery $markerQuery) $apiKey -}}
 
   {{- $previewConfig.Set "showPrivacyNotice" true -}}
-  {{- with .Site.Params.show_privacy_notice -}}
-    {{- $noticeRaw := lower (trim (printf "%v" .) " ") -}}
+  {{- if isset .Site.Params "show_privacy_notice" -}}
+    {{- $noticeRaw := lower (trim (printf "%v" .Site.Params.show_privacy_notice) " ") -}}
     {{- if in (slice "false" "0" "no") $noticeRaw -}}
       {{- $previewConfig.Set "showPrivacyNotice" false -}}
     {{- else if in (slice "true" "1" "yes") $noticeRaw -}}
@@ -133,8 +133,8 @@
 
   {{- /* Button configuration */ -}}
   {{- $previewConfig.Set "showButton" true -}}
-  {{- with .Site.Params.show_map_button -}}
-    {{- $buttonRaw := lower (trim (printf "%v" .) " ") -}}
+  {{- if isset .Site.Params "show_map_button" -}}
+    {{- $buttonRaw := lower (trim (printf "%v" .Site.Params.show_map_button) " ") -}}
     {{- if in (slice "false" "0" "no") $buttonRaw -}}
       {{- $previewConfig.Set "showButton" false -}}
     {{- else if in (slice "true" "1" "yes") $buttonRaw -}}
