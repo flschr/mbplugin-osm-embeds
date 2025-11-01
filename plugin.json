@@ -9,7 +9,7 @@
       "field": "params.privacy_mode",
       "label": "Privacy mode",
       "type": "boolean",
-      "default": true
+      "default": false
     },
     {
       "field": "params.map_privacy_notice_text",
