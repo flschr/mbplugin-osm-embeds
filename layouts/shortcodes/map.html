@@ -193,11 +193,7 @@
         }
         .mb-map-preview {
           position: relative;
-          border-radius: 0.75rem;
           overflow: hidden;
-          background: linear-gradient(135deg, #dbeafe, #bfdbfe);
-          box-shadow: 0 20px 45px -25px rgba(15, 23, 42, 0.45);
-          transition: transform 200ms ease, box-shadow 200ms ease;
         }
         .mb-map-preview label {
           display: block;
@@ -234,20 +230,15 @@
           align-items: center;
           gap: 0.5rem;
           padding: 0.75rem 1.5rem;
-          border-radius: 999px;
           background: rgba(255, 255, 255, 0.95);
           color: #1e3a8a;
           font-weight: 600;
           font-size: 0.875rem;
           letter-spacing: 0.025em;
-          box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
-          transition: all 200ms ease;
         }
-        .mb-map-preview label:hover .mb-map-overlay__action {
+        .mb-map-overlay__action:hover {
           background: #3b82f6;
           color: #ffffff;
-          transform: translateY(-2px);
-          box-shadow: 0 6px 16px rgba(59, 130, 246, 0.4);
         }
         .mb-map-preview label:focus-visible {
           outline: 3px solid rgba(14, 165, 233, 0.75);
@@ -255,15 +246,12 @@
         }
         .mb-map-canvas {
           display: block;
-          border-radius: 0.75rem;
           overflow: hidden;
-          background: #dbeafe;
         }
         .mb-map-canvas iframe {
           border: 0;
           width: 100%;
           aspect-ratio: 16 / 9;
-          background: #dbeafe;
         }
         .mb-map-toggle ~ .mb-map-canvas {
           display: none;
@@ -277,7 +265,6 @@
         .mb-map-hint {
           margin: 0;
           padding: 0.85rem 1rem;
-          border-radius: 0.75rem;
           background: #eff6ff;
           color: #1e3a8a;
           font-size: 0.95rem;
@@ -286,37 +273,15 @@
         .mb-map-error {
           margin: 1.5rem 0;
           padding: 1rem 1.25rem;
-          border-radius: 0.75rem;
           background: #fee2e2;
           color: #991b1b;
           display: grid;
           gap: 0.5rem;
         }
-        @media (prefers-reduced-motion: reduce) {
-          .mb-map-preview {
-            transition: none;
-          }
-        }
         @media (prefers-color-scheme: dark) {
-          .mb-map-preview {
-            background: linear-gradient(135deg, #1f2937, #111827);
-            box-shadow: 0 20px 45px -30px rgba(148, 163, 184, 0.4);
-          }
-          .mb-map-canvas {
-            background: #111827;
-          }
-          .mb-map-canvas iframe {
-            background: #111827;
-          }
           .mb-map-hint {
             background: #1f2937;
             color: #f3f4f6;
-          }
-        }
-        @media (hover: hover) {
-          .mb-map-preview:hover {
-            transform: scale(1.02);
-            box-shadow: 0 24px 50px -30px rgba(30, 64, 175, 0.55);
           }
         }
       </style>
