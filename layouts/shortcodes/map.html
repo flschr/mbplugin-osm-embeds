@@ -206,9 +206,12 @@
         }
         .mb-map-preview-content {
           display: none;
+          opacity: 0;
+          transition: opacity 0.2s ease;
         }
         .mb-map-preview-content.loaded {
           display: block;
+          opacity: 1;
         }
         .mb-map-preview label {
           display: block;
@@ -237,6 +240,9 @@
           width: 100%;
           height: auto;
           border-radius: inherit;
+        }
+        .mb-map-preview-content:not(.loaded) img {
+          visibility: hidden;
         }
         .mb-map-privacy-notice {
           position: absolute;
