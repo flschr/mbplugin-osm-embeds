@@ -116,7 +116,7 @@
   {{- $styleDark := $uiConfig.Get "styleDark" -}}
 
   {{- $previewBase := "https://maps.geoapify.com/v1/staticmap" -}}
-  {{- $markerQuery := printf "lonlat:%s,%s;type:awesome;color:#dd2e44;size:large" $lngFormatted $latFormatted -}}
+  {{- $markerQuery := printf "lonlat:%s,%s;type:awesome;color:#dd2e44;size:x-large;icon:circle;iconsize:large" $lngFormatted $latFormatted -}}
   {{- $lightPreview := printf "%s?style=%s&width=768&height=432&center=lonlat:%s,%s&zoom=%s&marker=%s&apiKey=%s" $previewBase (urlquery $styleLight) $lngFormatted $latFormatted $zoomString (urlquery $markerQuery) $apiKey -}}
   {{- $lightPreview2x := printf "%s?style=%s&width=1536&height=864&center=lonlat:%s,%s&zoom=%s&marker=%s&apiKey=%s" $previewBase (urlquery $styleLight) $lngFormatted $latFormatted $zoomString (urlquery $markerQuery) $apiKey -}}
   {{- $darkPreview := printf "%s?style=%s&width=768&height=432&center=lonlat:%s,%s&zoom=%s&marker=%s&apiKey=%s" $previewBase (urlquery $styleDark) $lngFormatted $latFormatted $zoomString (urlquery $markerQuery) $apiKey -}}
@@ -213,12 +213,29 @@
           display: block;
           cursor: pointer;
           position: relative;
+          border-radius: inherit;
+        }
+        .mb-map-preview label::before {
+          content: "";
+          position: absolute;
+          top: 0;
+          left: 0;
+          right: 0;
+          bottom: 0;
+          background: rgba(0, 0, 0, 0);
+          transition: background 0.2s ease;
+          pointer-events: none;
+          border-radius: inherit;
+        }
+        .mb-map-preview label:hover::before {
+          background: rgba(0, 0, 0, 0.15);
         }
         .mb-map-preview picture,
         .mb-map-preview img {
           display: block;
           width: 100%;
           height: auto;
+          border-radius: inherit;
         }
         .mb-map-privacy-notice {
           position: absolute;
@@ -229,6 +246,7 @@
           color: #ffffff;
           padding: 0.75rem 1rem;
           font-size: 0.875rem;
+          font-weight: normal;
           line-height: 1.4;
           text-align: center;
           border-bottom-left-radius: inherit;
