@@ -90,7 +90,7 @@
 {{- if $state.Get "hasError" -}}
   <div class="mb-map-error">
     <strong>Map shortcode error:</strong>
-    <span>{{ $state.Get "errorMessage" }}</span>
+    <span>{{ $state.Get "errorMessage" | htmlEscape }}</span>
     <span>Example: {{`{{< map loc="48.1351,11.5820" zoom="14" >}}`}}</span>
   </div>
 {{- else -}}
@@ -118,23 +118,45 @@
   {{- /* API key validation: Check if preview functionality is available */ -}}
   {{- $apiKey := "" -}}
   {{- with .Site.Params.map_preview_api_key -}}
-    {{- $apiKey = trim (printf "%v" .) " " -}}
+    {{- $candidate := trim (printf "%v" .) " " -}}
+    {{- /* Valid API keys must be longer than 10 characters and not be placeholder text */ -}}
+    {{- if gt (len $candidate) 10 -}}
+      {{- $lowerKey := lower $candidate -}}
+      {{- $isPlaceholder := or (eq $lowerKey "<nil>") (eq $lowerKey "nil") (eq $lowerKey "null") (eq $lowerKey "undefined") (eq $lowerKey "") -}}
+      {{- if not $isPlaceholder -}}
+        {{- $apiKey = $candidate -}}
+      {{- end -}}
+    {{- end -}}
   {{- end -}}
-  {{- /* Robust check: API key must be non-empty and not contain placeholder values */ -}}
-  {{- $hasPreview := and (ne $apiKey "") (not (in (slice "<nil>" "nil" "null" "undefined") (lower $apiKey))) (gt (len $apiKey) 10) -}}
+  {{- $hasPreview := ne $apiKey "" -}}
 
-  {{- /* Map style configuration with validation */ -}}
-  {{- /* Geoapify supported styles: osm-carto, osm-bright, osm-bright-grey, osm-bright-smooth,
-         klokantech-basic, osm-liberty, maptiler-3d, toner, toner-grey, positron,
-         positron-blue, positron-red, dark-matter, dark-matter-brown, dark-matter-dark-grey,
-         dark-matter-dark-purple, dark-matter-purple-roads, dark-matter-yellow-roads */ -}}
-  {{- $validStyles := slice "osm-carto" "osm-bright" "osm-bright-grey" "osm-bright-smooth" "klokantech-basic" "osm-liberty" "maptiler-3d" "toner" "toner-grey" "positron" "positron-blue" "positron-red" "dark-matter" "dark-matter-brown" "dark-matter-dark-grey" "dark-matter-dark-purple" "dark-matter-purple-roads" "dark-matter-yellow-roads" -}}
+  {{- /* Map style configuration
 
-  {{- $styleLightCandidate := trim (printf "%v" (or .Site.Params.map_preview_style_light "osm-carto")) " " -}}
-  {{- $styleLight := cond (and (ne $styleLightCandidate "") (in $validStyles $styleLightCandidate)) $styleLightCandidate "osm-carto" -}}
+         Geoapify supported styles include: osm-carto, osm-bright, osm-bright-grey,
+         osm-bright-smooth, klokantech-basic, osm-liberty, maptiler-3d, toner,
+         toner-grey, positron, positron-blue, positron-red, dark-matter,
+         dark-matter-brown, dark-matter-dark-grey, dark-matter-dark-purple,
+         dark-matter-purple-roads, dark-matter-yellow-roads
 
-  {{- $styleDarkCandidate := trim (printf "%v" (or .Site.Params.map_preview_style_dark "osm-carto")) " " -}}
-  {{- $styleDark := cond (and (ne $styleDarkCandidate "") (in $validStyles $styleDarkCandidate)) $styleDarkCandidate "osm-carto" -}}
+         See: https://apidocs.geoapify.com/docs/maps/map-tiles/
+
+         Invalid styles will fall back to Geoapify's default rendering.
+  */ -}}
+  {{- $styleLight := "osm-carto" -}}
+  {{- with .Site.Params.map_preview_style_light -}}
+    {{- $candidate := trim (printf "%v" .) " " -}}
+    {{- if ne $candidate "" -}}
+      {{- $styleLight = $candidate -}}
+    {{- end -}}
+  {{- end -}}
+
+  {{- $styleDark := "osm-carto" -}}
+  {{- with .Site.Params.map_preview_style_dark -}}
+    {{- $candidate := trim (printf "%v" .) " " -}}
+    {{- if ne $candidate "" -}}
+      {{- $styleDark = $candidate -}}
+    {{- end -}}
+  {{- end -}}
 
   {{- /* Marker configuration */ -}}
   {{- $markerParams := printf "%v" (or .Site.Params.map_marker_params "type:awesome;color:red;size:60;shadow:no") -}}
@@ -467,40 +489,21 @@
                * - Invalid map style configuration
                */
               var showFallback = function() {
-                // Get the OpenStreetMap link from the label
-                var label = content.querySelector('label');
-                if (label) {
-                  var toggleId = label.getAttribute('for');
-                  var osmLink = '';
+                // Get the OpenStreetMap link from wrapper's data attribute
+                var wrapper = content.closest('.mb-map-wrapper');
+                var osmLink = wrapper && wrapper.getAttribute('data-osm-link');
 
-                  // Try to extract OSM link from the page context
-                  // If we can't find it, construct a basic one from the image alt or title
-                  var wrapper = content.closest('.mb-map-wrapper');
-                  if (wrapper) {
-                    var iframe = wrapper.querySelector('iframe');
-                    if (iframe) {
-                      var iframeSrc = iframe.getAttribute('src');
-                      // Extract coordinates from iframe src if possible
-                      var match = iframeSrc.match(/marker=([^&]+)/);
-                      if (match) {
-                        var coords = match[1].split(',');
-                        osmLink = 'https://www.openstreetmap.org/?mlat=' + coords[0] + '&mlon=' + coords[1];
-                      }
-                    }
-                  }
-
-                  // Fallback if we couldn't extract the link
-                  if (!osmLink) {
-                    osmLink = 'https://www.openstreetmap.org/';
-                  }
-
-                  // Replace content with fallback message
-                  content.innerHTML = '<div style="padding: 2rem; text-align: center; background: #fee2e2; color: #991b1b; border-radius: inherit;">' +
-                    '<p style="margin: 0 0 1rem 0;"><strong>Map preview could not be loaded.</strong></p>' +
-                    '<p style="margin: 0;"><a href="' + osmLink + '" style="color: #991b1b; text-decoration: underline;">View location on OpenStreetMap</a></p>' +
-                    '</div>';
-                  content.classList.add('loaded');
+                // Fallback to generic OSM homepage if link is not available
+                if (!osmLink) {
+                  osmLink = 'https://www.openstreetmap.org/';
                 }
+
+                // Replace content with fallback message
+                content.innerHTML = '<div style="padding: 2rem; text-align: center; background: #fee2e2; color: #991b1b; border-radius: inherit;">' +
+                  '<p style="margin: 0 0 1rem 0;"><strong>Map preview could not be loaded.</strong></p>' +
+                  '<p style="margin: 0;"><a href="' + osmLink + '" style="color: #991b1b; text-decoration: underline;">View location on OpenStreetMap</a></p>' +
+                  '</div>';
+                content.classList.add('loaded');
 
                 if (placeholder && placeholder.classList.contains('mb-map-loading-placeholder')) {
                   placeholder.classList.add('hidden');
@@ -536,7 +539,7 @@
       </script>
     {{- end -}}
 
-    <div class="mb-map-wrapper">
+    <div class="mb-map-wrapper" data-osm-link="{{ $osmLink | safeURL }}">
       {{- if and $hasPreview $privacyMode -}}
         {{- /* With API key and privacy mode: show preview with toggle */ -}}
         <input type="checkbox" id="{{ $toggleID }}" class="mb-map-toggle" />
