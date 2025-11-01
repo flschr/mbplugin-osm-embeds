@@ -28,18 +28,17 @@ Embed OpenStreetMap views in your Micro.blog posts with optional privacy protect
 
 Live example: [fischr.org/2017/09/03/oben-links-am-lago-di](https://fischr.org/2017/09/03/oben-links-am-lago-di)
 
-## Testing
-
-Use the [OSM Embed Validator](https://flschr.github.io/mbplugin-osm-embeds/) to try out your settings in the browser.
-
 ## Configuration
 
-Install the plugin and configure optional settings under **Design → Edit Plugins**:
+Install the plugin and configure optional settings:
 
-- **Geoapify API Key** – For static preview images (optional but recommended)
+- **Privacy Mode** - If enabled, a static preview image is loaded instead of interactive map.
+- **Privacy banner text** – Text for optional privacy overlay
+- **Button text** - Text for the alternative button (displayed instead of privacy banner)
+- **Geoapify API Key** – Necessary for static preview images
 - **Default Zoom** – Used when no zoom is specified in the shortcode
-- **Preview Style** – Map design for light/dark mode
-- **Privacy Notice** – Text for optional privacy overlay
+- **Preview Styles** – Map design for light/dark mode
+
 
 ### Set Up Static Previews (Optional)
 

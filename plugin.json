@@ -13,7 +13,7 @@
     },
     {
       "field": "params.map_privacy_notice_text",
-      "label": "Privacy banner text)",
+      "label": "Privacy banner text",
       "type": "string",
       "default": ""
     },
