@@ -39,13 +39,19 @@
       "field": "params.map_preview_style_light",
       "label": "Geoapify preview style (light mode)",
       "type": "string",
-      "default": "osm-bright"
+      "default": "osm-carto"
     },
     {
       "field": "params.map_preview_style_dark",
       "label": "Geoapify preview style (dark mode)",
       "type": "string",
-      "default": "osm-bright"
+      "default": "osm-carto"
+    },
+    {
+      "field": "params.map_marker_params",
+      "label": "Custom marker parameters (e.g., type:awesome;color:red;size:60;shadow:no)",
+      "type": "string",
+      "default": "type:awesome;color:red;size:60;shadow:no"
     },
     {
       "field": "params.map_preview_api_key",
