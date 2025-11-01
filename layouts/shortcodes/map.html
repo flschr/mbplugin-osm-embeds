@@ -215,6 +215,21 @@
           position: relative;
           border-radius: inherit;
         }
+        .mb-map-preview label::before {
+          content: "";
+          position: absolute;
+          top: 0;
+          left: 0;
+          right: 0;
+          bottom: 0;
+          background: rgba(0, 0, 0, 0);
+          transition: background 0.2s ease;
+          pointer-events: none;
+          border-radius: inherit;
+        }
+        .mb-map-preview label:hover::before {
+          background: rgba(0, 0, 0, 0.15);
+        }
         .mb-map-preview picture,
         .mb-map-preview img {
           display: block;
