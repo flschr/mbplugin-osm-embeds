@@ -113,25 +113,20 @@
   {{- $darkPreview := printf "%s?style=%s&width=768&height=432&center=lonlat:%s,%s&zoom=%s&marker=%s&apiKey=%s" $previewBase (urlquery $styleDark) $lngFormatted $latFormatted $zoomString (urlquery $markerQuery) $apiKey -}}
   {{- $darkPreview2x := printf "%s?style=%s&width=1536&height=864&center=lonlat:%s,%s&zoom=%s&marker=%s&apiKey=%s" $previewBase (urlquery $styleDark) $lngFormatted $latFormatted $zoomString (urlquery $markerQuery) $apiKey -}}
 
-  {{- /* Privacy notice configuration */ -}}
-  {{- $showPrivacyNotice := true -}}
-  {{- if isset .Site.Params "show_privacy_notice" -}}
-    {{- $noticeRaw := lower (trim (printf "%v" .Site.Params.show_privacy_notice) " ") -}}
-    {{- if in (slice "false" "0" "no") $noticeRaw -}}
-      {{- $showPrivacyNotice = false -}}
+  {{- /* Privacy mode configuration */ -}}
+  {{- $privacyMode := true -}}
+  {{- if isset .Site.Params "privacy_mode" -}}
+    {{- $modeRaw := lower (trim (printf "%v" .Site.Params.privacy_mode) " ") -}}
+    {{- if in (slice "false" "0" "no") $modeRaw -}}
+      {{- $privacyMode = false -}}
     {{- end -}}
   {{- end -}}
-  {{- $privacyNoticeText := printf "%v" (or .Site.Params.map_privacy_notice_text "We only load OpenStreetMap after you interact with the preview.") -}}
 
-  {{- /* Button configuration */ -}}
-  {{- $showButton := true -}}
-  {{- if isset .Site.Params "show_map_button" -}}
-    {{- $buttonRaw := lower (trim (printf "%v" .Site.Params.show_map_button) " ") -}}
-    {{- if in (slice "false" "0" "no") $buttonRaw -}}
-      {{- $showButton = false -}}
-    {{- end -}}
-  {{- end -}}
+  {{- /* Privacy notice and button configuration */ -}}
+  {{- $privacyNoticeText := trim (printf "%v" (or .Site.Params.map_privacy_notice_text "")) " " -}}
+  {{- $showPrivacyNotice := and $privacyMode (ne $privacyNoticeText "") -}}
   {{- $buttonText := printf "%v" (or .Site.Params.map_button_text "Interactive Map") -}}
+  {{- $showButton := and $privacyMode (eq $privacyNoticeText "") -}}
 
   {{- /* Feed output uses only the static preview or a fallback link */ -}}
   {{- if $isFeed -}}
@@ -322,8 +317,8 @@
     {{- end -}}
 
     <div class="mb-map-wrapper">
-      {{- if $hasPreview -}}
-        {{- /* With API key: show preview with toggle */ -}}
+      {{- if and $hasPreview $privacyMode -}}
+        {{- /* With API key and privacy mode: show preview with toggle */ -}}
         <input type="checkbox" id="{{ $toggleID }}" class="mb-map-toggle" />
         <div class="mb-map-preview{{ if $showPrivacyNotice }} mb-map-preview--with-notice{{ end }}{{ if $showButton }} mb-map-preview--with-button{{ end }}">
           <label for="{{ $toggleID }}">
@@ -346,7 +341,7 @@
           <iframe src="{{ $iframeURL | safeURL }}" loading="lazy" referrerpolicy="no-referrer" allowfullscreen title="OpenStreetMap map view" aria-label="Interactive OpenStreetMap view for {{ $latFormatted }}, {{ $lngFormatted }}"></iframe>
         </div>
       {{- else -}}
-        {{- /* Without API key: show map directly */ -}}
+        {{- /* Without API key or privacy mode disabled: show map directly */ -}}
         <div class="mb-map-canvas">
           <iframe src="{{ $iframeURL | safeURL }}" loading="lazy" referrerpolicy="no-referrer" allowfullscreen title="OpenStreetMap map view" aria-label="Interactive OpenStreetMap view for {{ $latFormatted }}, {{ $lngFormatted }}"></iframe>
         </div>
