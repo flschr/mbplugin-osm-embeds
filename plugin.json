@@ -39,13 +39,13 @@
       "field": "params.map_preview_style_light",
       "label": "Geoapify preview style (light mode)",
       "type": "string",
-      "default": "osm-carto"
+      "default": "osm-bright"
     },
     {
       "field": "params.map_preview_style_dark",
       "label": "Geoapify preview style (dark mode)",
       "type": "string",
-      "default": "osm-carto"
+      "default": "osm-bright"
     },
     {
       "field": "params.map_preview_api_key",
