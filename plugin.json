@@ -3,7 +3,7 @@
   "title": "Privacy-Friendly OpenStreetMap Embeds",
   "description": "Embed interactive maps powered by OpenStreetMap easily.",
   "author": "René Fischer",
-  "version": "1.0.1",
+  "version": "1.0.2",
   "fields": [
     {
       "field": "params.privacy_mode",

@@ -430,91 +430,100 @@
          * 2. Image fails to load → Show fallback link to OSM
          * 3. Image already cached → Show immediately
          *
-         * No timeout is used - we wait for definitive load/error events.
+         * Mobile-friendly: Works even if DOMContentLoaded already fired.
          */
-        document.addEventListener('DOMContentLoaded', function() {
-          document.querySelectorAll('.mb-map-preview-content').forEach(function(content) {
-            var img = content.querySelector('img');
-            if (!img) return;
+        (function() {
+          var initMaps = function() {
+            document.querySelectorAll('.mb-map-preview-content').forEach(function(content) {
+              var img = content.querySelector('img');
+              if (!img) return;
 
-            var placeholder = content.previousElementSibling;
+              var placeholder = content.previousElementSibling;
 
-            /**
-             * Show the preview image (successful load)
-             */
-            var showContent = function() {
-              content.classList.add('loaded');
-              if (placeholder && placeholder.classList.contains('mb-map-loading-placeholder')) {
-                placeholder.style.display = 'none';
-              }
-            };
+              /**
+               * Show the preview image (successful load)
+               */
+              var showContent = function() {
+                content.classList.add('loaded');
+                if (placeholder && placeholder.classList.contains('mb-map-loading-placeholder')) {
+                  placeholder.style.display = 'none';
+                }
+              };
 
-            /**
-             * Show fallback when image fails to load
-             * This could happen due to:
-             * - Invalid/expired API key
-             * - Network errors
-             * - Invalid map style configuration
-             */
-            var showFallback = function() {
-              // Get the OpenStreetMap link from the label
-              var label = content.querySelector('label');
-              if (label) {
-                var toggleId = label.getAttribute('for');
-                var osmLink = '';
+              /**
+               * Show fallback when image fails to load
+               * This could happen due to:
+               * - Invalid/expired API key
+               * - Network errors
+               * - Invalid map style configuration
+               */
+              var showFallback = function() {
+                // Get the OpenStreetMap link from the label
+                var label = content.querySelector('label');
+                if (label) {
+                  var toggleId = label.getAttribute('for');
+                  var osmLink = '';
 
-                // Try to extract OSM link from the page context
-                // If we can't find it, construct a basic one from the image alt or title
-                var wrapper = content.closest('.mb-map-wrapper');
-                if (wrapper) {
-                  var iframe = wrapper.querySelector('iframe');
-                  if (iframe) {
-                    var iframeSrc = iframe.getAttribute('src');
-                    // Extract coordinates from iframe src if possible
-                    var match = iframeSrc.match(/marker=([^&]+)/);
-                    if (match) {
-                      var coords = match[1].split(',');
-                      osmLink = 'https://www.openstreetmap.org/?mlat=' + coords[0] + '&mlon=' + coords[1];
+                  // Try to extract OSM link from the page context
+                  // If we can't find it, construct a basic one from the image alt or title
+                  var wrapper = content.closest('.mb-map-wrapper');
+                  if (wrapper) {
+                    var iframe = wrapper.querySelector('iframe');
+                    if (iframe) {
+                      var iframeSrc = iframe.getAttribute('src');
+                      // Extract coordinates from iframe src if possible
+                      var match = iframeSrc.match(/marker=([^&]+)/);
+                      if (match) {
+                        var coords = match[1].split(',');
+                        osmLink = 'https://www.openstreetmap.org/?mlat=' + coords[0] + '&mlon=' + coords[1];
+                      }
                     }
                   }
+
+                  // Fallback if we couldn't extract the link
+                  if (!osmLink) {
+                    osmLink = 'https://www.openstreetmap.org/';
+                  }
+
+                  // Replace content with fallback message
+                  content.innerHTML = '<div style="padding: 2rem; text-align: center; background: #fee2e2; color: #991b1b; border-radius: inherit;">' +
+                    '<p style="margin: 0 0 1rem 0;"><strong>Map preview could not be loaded.</strong></p>' +
+                    '<p style="margin: 0;"><a href="' + osmLink + '" style="color: #991b1b; text-decoration: underline;">View location on OpenStreetMap</a></p>' +
+                    '</div>';
+                  content.classList.add('loaded');
                 }
 
-                // Fallback if we couldn't extract the link
-                if (!osmLink) {
-                  osmLink = 'https://www.openstreetmap.org/';
+                if (placeholder && placeholder.classList.contains('mb-map-loading-placeholder')) {
+                  placeholder.style.display = 'none';
                 }
+              };
 
-                // Replace content with fallback message
-                content.innerHTML = '<div style="padding: 2rem; text-align: center; background: #fee2e2; color: #991b1b; border-radius: inherit;">' +
-                  '<p style="margin: 0 0 1rem 0;"><strong>Map preview could not be loaded.</strong></p>' +
-                  '<p style="margin: 0;"><a href="' + osmLink + '" style="color: #991b1b; text-decoration: underline;">View location on OpenStreetMap</a></p>' +
-                  '</div>';
-                content.classList.add('loaded');
-              }
-
-              if (placeholder && placeholder.classList.contains('mb-map-loading-placeholder')) {
-                placeholder.style.display = 'none';
-              }
-            };
-
-            // Check if image is already loaded (cached)
-            if (img.complete && img.naturalHeight !== 0) {
-              showContent();
-            } else if (img.complete && img.naturalHeight === 0) {
-              // Image loaded but has no dimensions = failed to load
-              showFallback();
-            } else {
-              // Image is still loading, attach event listeners
-              img.addEventListener('load', function() {
+              // Check if image is already loaded (cached)
+              if (img.complete && img.naturalHeight !== 0) {
                 showContent();
-              });
-
-              img.addEventListener('error', function() {
+              } else if (img.complete && img.naturalHeight === 0) {
+                // Image loaded but has no dimensions = failed to load
                 showFallback();
-              });
-            }
-          });
-        });
+              } else {
+                // Image is still loading, attach event listeners
+                img.addEventListener('load', function() {
+                  showContent();
+                });
+
+                img.addEventListener('error', function() {
+                  showFallback();
+                });
+              }
+            });
+          };
+
+          // Run immediately if DOM is already loaded (fixes mobile issues)
+          if (document.readyState === 'loading') {
+            document.addEventListener('DOMContentLoaded', initMaps);
+          } else {
+            initMaps();
+          }
+        })();
       </script>
     {{- end -}}
 
