@@ -1,9 +1,9 @@
 {
   "name": "mbplugin-map",
-  "title": "Privacy-Friendly Maps",
+  "title": "Privacy-Friendly OpenStreetMap Embeds",
   "description": "Embed interactive maps powered by OpenStreetMap easily.",
   "author": "René Fischer",
-  "version": "5.0.1",
+  "version": "1.0.0",
   "fields": [
     {
       "field": "params.privacy_mode",
