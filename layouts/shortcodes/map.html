@@ -192,6 +192,7 @@
           max-width: 48rem;
           margin: 0 auto 2rem auto;
           font-family: var(--map-font-family, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif);
+          border-radius: var(--map-border-radius, var(--img-border-radius, 0.5rem));
         }
         .mb-map-toggle {
           position: absolute;
@@ -262,6 +263,27 @@
         }
         .mb-map-preview--with-notice .mb-map-overlay {
           bottom: 4rem;
+        }
+        .mb-map-overlay .button {
+          display: inline-block;
+          padding: 0.75rem 1.5rem;
+          background: #2563eb;
+          color: #ffffff;
+          font-size: 1rem;
+          font-weight: 600;
+          border-radius: 0.5rem;
+          box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+          transition: all 0.2s ease;
+          pointer-events: none;
+        }
+        .mb-map-preview label:hover .button {
+          background: #1d4ed8;
+          transform: translateY(-1px);
+          box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+        }
+        .mb-map-preview label:active .button {
+          transform: translateY(0);
+          box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
         }
         .mb-map-preview label:focus-visible {
           outline: 3px solid rgba(14, 165, 233, 0.75);
