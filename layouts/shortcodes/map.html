@@ -99,20 +99,14 @@
   {{- end -}}
   {{- $apiKey := $previewConfig.Get "apiKey" -}}
   {{- $hasPreview := and (ne $apiKey "") (ne $apiKey "<nil>") -}}
-  {{- $previewConfig.Set "styleFallback" "osm-carto" -}}
-  {{- $styleFallbackCandidate := printf "%v" (or .Site.Params.map_preview_style "osm-carto") -}}
-  {{- if ne (trim $styleFallbackCandidate " ") "" -}}
-    {{- $previewConfig.Set "styleFallback" $styleFallbackCandidate -}}
-  {{- end -}}
-  {{- $styleFallback := $previewConfig.Get "styleFallback" -}}
-  {{- $previewConfig.Set "styleLight" $styleFallback -}}
-  {{- $styleLightCandidate := printf "%v" (or .Site.Params.map_preview_style_light $styleFallback) -}}
+  {{- $previewConfig.Set "styleLight" "osm-carto" -}}
+  {{- $styleLightCandidate := printf "%v" (or .Site.Params.map_preview_style_light "osm-carto") -}}
   {{- if ne (trim $styleLightCandidate " ") "" -}}
     {{- $previewConfig.Set "styleLight" $styleLightCandidate -}}
   {{- end -}}
   {{- $styleLight := $previewConfig.Get "styleLight" -}}
-  {{- $previewConfig.Set "styleDark" $styleFallback -}}
-  {{- $styleDarkCandidate := printf "%v" (or .Site.Params.map_preview_style_dark $styleFallback) -}}
+  {{- $previewConfig.Set "styleDark" "osm-carto" -}}
+  {{- $styleDarkCandidate := printf "%v" (or .Site.Params.map_preview_style_dark "osm-carto") -}}
   {{- if ne (trim $styleDarkCandidate " ") "" -}}
     {{- $previewConfig.Set "styleDark" $styleDarkCandidate -}}
   {{- end -}}
@@ -124,8 +118,6 @@
   {{- $lightPreview2x := printf "%s?style=%s&width=1536&height=864&center=lonlat:%s,%s&zoom=%s&marker=%s&apiKey=%s" $previewBase (urlquery $styleLight) $lngFormatted $latFormatted $zoomString (urlquery $markerQuery) $apiKey -}}
   {{- $darkPreview := printf "%s?style=%s&width=768&height=432&center=lonlat:%s,%s&zoom=%s&marker=%s&apiKey=%s" $previewBase (urlquery $styleDark) $lngFormatted $latFormatted $zoomString (urlquery $markerQuery) $apiKey -}}
   {{- $darkPreview2x := printf "%s?style=%s&width=1536&height=864&center=lonlat:%s,%s&zoom=%s&marker=%s&apiKey=%s" $previewBase (urlquery $styleDark) $lngFormatted $latFormatted $zoomString (urlquery $markerQuery) $apiKey -}}
-  {{- $fallbackPreview := printf "%s?style=%s&width=768&height=432&center=lonlat:%s,%s&zoom=%s&marker=%s&apiKey=%s" $previewBase (urlquery $styleFallback) $lngFormatted $latFormatted $zoomString (urlquery $markerQuery) $apiKey -}}
-  {{- $fallbackPreview2x := printf "%s?style=%s&width=1536&height=864&center=lonlat:%s,%s&zoom=%s&marker=%s&apiKey=%s" $previewBase (urlquery $styleFallback) $lngFormatted $latFormatted $zoomString (urlquery $markerQuery) $apiKey -}}
 
   {{- $previewConfig.Set "showPrivacyNotice" true -}}
   {{- with .Site.Params.show_privacy_notice -}}
@@ -143,7 +135,7 @@
   {{- if $isFeed -}}
     {{- if and $hasPreview (ne (trim $apiKey "") "") -}}
       <a href="{{ $osmLink | htmlEscape }}">
-        <img src="{{ $fallbackPreview | safeURL }}" srcset="{{ $fallbackPreview | safeURL }} 1x, {{ $fallbackPreview2x | safeURL }} 2x" alt="Static map preview at {{ $latFormatted }}, {{ $lngFormatted }}" width="768" height="432" loading="lazy" decoding="async" />
+        <img src="{{ $lightPreview | safeURL }}" srcset="{{ $lightPreview | safeURL }} 1x, {{ $lightPreview2x | safeURL }} 2x" alt="Static map preview at {{ $latFormatted }}, {{ $lngFormatted }}" width="768" height="432" loading="lazy" decoding="async" />
       </a>
     {{- else -}}
       <a href="{{ $osmLink | htmlEscape }}">View this location on OpenStreetMap ({{ $latFormatted }}, {{ $lngFormatted }})</a>
@@ -341,7 +333,7 @@
             <picture>
               <source media="(prefers-color-scheme: dark)" srcset="{{ $darkPreview | safeURL }} 1x, {{ $darkPreview2x | safeURL }} 2x" />
               <source media="(prefers-color-scheme: light)" srcset="{{ $lightPreview | safeURL }} 1x, {{ $lightPreview2x | safeURL }} 2x" />
-              <img src="{{ $fallbackPreview | safeURL }}" srcset="{{ $fallbackPreview | safeURL }} 1x, {{ $fallbackPreview2x | safeURL }} 2x" alt="Static map preview at {{ $latFormatted }}, {{ $lngFormatted }}" width="768" height="432" loading="lazy" decoding="async" />
+              <img src="{{ $lightPreview | safeURL }}" srcset="{{ $lightPreview | safeURL }} 1x, {{ $lightPreview2x | safeURL }} 2x" alt="Static map preview at {{ $latFormatted }}, {{ $lngFormatted }}" width="768" height="432" loading="lazy" decoding="async" />
             </picture>
             <div class="mb-map-overlay">
               {{- if $showPrivacyNotice -}}
