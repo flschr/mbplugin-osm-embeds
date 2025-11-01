@@ -41,7 +41,7 @@ Install the plugin and configure optional settings:
 - **Preview Styles** – Map design for light/dark mode
 
 
-### Set Up Static Previews (Optional)
+### Setup static preview images (optional)
 
 Without an API key, the map embeds directly. With Geoapify you get a clickable preview image:
 
@@ -55,7 +55,7 @@ Without an API key, the map embeds directly. With Geoapify you get a clickable p
 Explore customization options with these interactive playgrounds:
 
 - **[Pin Playground](https://apidocs.geoapify.com/playground/icon/)** – Design custom map markers
-- **[Color & Style Playground](https://www.geoapify.com/static-maps-api/)** – Test different map styles and colors
+- **[Color & Style Playground](https://www.geoapify.com/static-maps-api/)** – Test different map styles and colors to use for light- and dark-mode
 
 ## Notes
 
@@ -64,4 +64,4 @@ Explore customization options with these interactive playgrounds:
 
 ## Author
 
-Created by **René Fischer**.
+Created by **[René Fischer](https://fischr.org)**.
