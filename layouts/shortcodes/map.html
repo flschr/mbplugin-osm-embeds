@@ -32,26 +32,31 @@
     {{- else -}}
       {{- $latValue := float $latString -}}
       {{- $lngValue := float $lngString -}}
-      {{- $state.Set "latValue" $latValue -}}
-      {{- $state.Set "lngValue" $lngValue -}}
-      {{- $state.Set "latFormatted" (printf "%.6f" $latValue) -}}
-      {{- $state.Set "lngFormatted" (printf "%.6f" $lngValue) -}}
-      {{- $state.Set "osmLink" (printf "https://www.openstreetmap.org/?mlat=%.6f&mlon=%.6f#map=%s/%.6f/%.6f" $latValue $lngValue (printf "%s" ($state.Get "zoomString")) $latValue $lngValue) -}}
+      {{- /* Validate coordinate ranges */ -}}
+      {{- if or (lt $latValue -90.0) (gt $latValue 90.0) -}}
+        {{- $state.Set "hasError" true -}}
+        {{- $state.Set "errorMessage" (printf "Latitude must be between -90 and 90. Received: %s" $latString) -}}
+      {{- else if or (lt $lngValue -180.0) (gt $lngValue 180.0) -}}
+        {{- $state.Set "hasError" true -}}
+        {{- $state.Set "errorMessage" (printf "Longitude must be between -180 and 180. Received: %s" $lngString) -}}
+      {{- else -}}
+        {{- $state.Set "latValue" $latValue -}}
+        {{- $state.Set "lngValue" $lngValue -}}
+        {{- $state.Set "latFormatted" (printf "%.6f" $latValue) -}}
+        {{- $state.Set "lngFormatted" (printf "%.6f" $lngValue) -}}
+      {{- end -}}
     {{- end -}}
   {{- end -}}
 {{- end -}}
 
 {{- /* Determine zoom level based on defaults and shortcode parameters */ -}}
 {{- if not ($state.Get "hasError") -}}
-  {{- $zoomScratch := newScratch -}}
-  {{- $zoomScratch.Set "zoomInt" 14 -}}
-  {{- $zoomScratch.Set "zoomString" "14" -}}
   {{- $defaultZoomCandidate := printf "%v" (or .Site.Params.default_map_zoom "14") -}}
   {{- if (findRE `^\d+$` $defaultZoomCandidate) -}}
     {{- $defaultZoomInt := int $defaultZoomCandidate -}}
     {{- if and (ge $defaultZoomInt 0) (le $defaultZoomInt 19) -}}
-      {{- $zoomScratch.Set "zoomInt" $defaultZoomInt -}}
-      {{- $zoomScratch.Set "zoomString" (printf "%d" $defaultZoomInt) -}}
+      {{- $state.Set "zoomInt" $defaultZoomInt -}}
+      {{- $state.Set "zoomString" (printf "%d" $defaultZoomInt) -}}
     {{- end -}}
   {{- end -}}
   {{- with .Get "zoom" -}}
@@ -59,13 +64,11 @@
     {{- if (findRE `^\d+$` $zoomCandidate) -}}
       {{- $zoomValue := int $zoomCandidate -}}
       {{- if and (ge $zoomValue 0) (le $zoomValue 19) -}}
-        {{- $zoomScratch.Set "zoomInt" $zoomValue -}}
-        {{- $zoomScratch.Set "zoomString" (printf "%d" $zoomValue) -}}
+        {{- $state.Set "zoomInt" $zoomValue -}}
+        {{- $state.Set "zoomString" (printf "%d" $zoomValue) -}}
       {{- end -}}
     {{- end -}}
   {{- end -}}
-  {{- $state.Set "zoomInt" ($zoomScratch.Get "zoomInt") -}}
-  {{- $state.Set "zoomString" ($zoomScratch.Get "zoomString") -}}
   {{- $state.Set "osmLink" (printf "https://www.openstreetmap.org/?mlat=%.6f&mlon=%.6f#map=%s/%.6f/%.6f" ($state.Get "latValue") ($state.Get "lngValue") ($state.Get "zoomString") ($state.Get "latValue") ($state.Get "lngValue")) -}}
 {{- end -}}
 
@@ -91,26 +94,26 @@
   {{- end -}}
   {{- $isFeed := in (slice "rss" "json" "atom") $mediaSubType -}}
 
-  {{- /* Static preview configuration */ -}}
-  {{- $previewConfig := newScratch -}}
-  {{- $previewConfig.Set "apiKey" "" -}}
+  {{- /* UI and preview configuration */ -}}
+  {{- $uiConfig := newScratch -}}
+  {{- $uiConfig.Set "apiKey" "" -}}
   {{- with .Site.Params.map_preview_api_key -}}
-    {{- $previewConfig.Set "apiKey" (trim (printf "%v" .) " ") -}}
+    {{- $uiConfig.Set "apiKey" (trim (printf "%v" .) " ") -}}
   {{- end -}}
-  {{- $apiKey := $previewConfig.Get "apiKey" -}}
+  {{- $apiKey := $uiConfig.Get "apiKey" -}}
   {{- $hasPreview := and (ne $apiKey "") (ne $apiKey "<nil>") -}}
-  {{- $previewConfig.Set "styleLight" "osm-carto" -}}
+  {{- $uiConfig.Set "styleLight" "osm-carto" -}}
   {{- $styleLightCandidate := printf "%v" (or .Site.Params.map_preview_style_light "osm-carto") -}}
   {{- if ne (trim $styleLightCandidate " ") "" -}}
-    {{- $previewConfig.Set "styleLight" $styleLightCandidate -}}
+    {{- $uiConfig.Set "styleLight" $styleLightCandidate -}}
   {{- end -}}
-  {{- $styleLight := $previewConfig.Get "styleLight" -}}
-  {{- $previewConfig.Set "styleDark" "osm-carto" -}}
+  {{- $styleLight := $uiConfig.Get "styleLight" -}}
+  {{- $uiConfig.Set "styleDark" "osm-carto" -}}
   {{- $styleDarkCandidate := printf "%v" (or .Site.Params.map_preview_style_dark "osm-carto") -}}
   {{- if ne (trim $styleDarkCandidate " ") "" -}}
-    {{- $previewConfig.Set "styleDark" $styleDarkCandidate -}}
+    {{- $uiConfig.Set "styleDark" $styleDarkCandidate -}}
   {{- end -}}
-  {{- $styleDark := $previewConfig.Get "styleDark" -}}
+  {{- $styleDark := $uiConfig.Get "styleDark" -}}
 
   {{- $previewBase := "https://maps.geoapify.com/v1/staticmap" -}}
   {{- $markerQuery := printf "lonlat:%s,%s;type:awesome;color:#dd2e44;size:large" $lngFormatted $latFormatted -}}
@@ -119,34 +122,31 @@
   {{- $darkPreview := printf "%s?style=%s&width=768&height=432&center=lonlat:%s,%s&zoom=%s&marker=%s&apiKey=%s" $previewBase (urlquery $styleDark) $lngFormatted $latFormatted $zoomString (urlquery $markerQuery) $apiKey -}}
   {{- $darkPreview2x := printf "%s?style=%s&width=1536&height=864&center=lonlat:%s,%s&zoom=%s&marker=%s&apiKey=%s" $previewBase (urlquery $styleDark) $lngFormatted $latFormatted $zoomString (urlquery $markerQuery) $apiKey -}}
 
-  {{- $previewConfig.Set "showPrivacyNotice" true -}}
+  {{- /* Privacy notice configuration */ -}}
+  {{- $uiConfig.Set "showPrivacyNotice" true -}}
   {{- if isset .Site.Params "show_privacy_notice" -}}
     {{- $noticeRaw := lower (trim (printf "%v" .Site.Params.show_privacy_notice) " ") -}}
     {{- if in (slice "false" "0" "no") $noticeRaw -}}
-      {{- $previewConfig.Set "showPrivacyNotice" false -}}
-    {{- else if in (slice "true" "1" "yes") $noticeRaw -}}
-      {{- $previewConfig.Set "showPrivacyNotice" true -}}
+      {{- $uiConfig.Set "showPrivacyNotice" false -}}
     {{- end -}}
   {{- end -}}
-  {{- $showPrivacyNotice := $previewConfig.Get "showPrivacyNotice" -}}
+  {{- $showPrivacyNotice := $uiConfig.Get "showPrivacyNotice" -}}
   {{- $privacyNoticeText := printf "%v" (or .Site.Params.map_privacy_notice_text "We only load OpenStreetMap after you interact with the preview.") -}}
 
   {{- /* Button configuration */ -}}
-  {{- $previewConfig.Set "showButton" true -}}
+  {{- $uiConfig.Set "showButton" true -}}
   {{- if isset .Site.Params "show_map_button" -}}
     {{- $buttonRaw := lower (trim (printf "%v" .Site.Params.show_map_button) " ") -}}
     {{- if in (slice "false" "0" "no") $buttonRaw -}}
-      {{- $previewConfig.Set "showButton" false -}}
-    {{- else if in (slice "true" "1" "yes") $buttonRaw -}}
-      {{- $previewConfig.Set "showButton" true -}}
+      {{- $uiConfig.Set "showButton" false -}}
     {{- end -}}
   {{- end -}}
-  {{- $showButton := $previewConfig.Get "showButton" -}}
+  {{- $showButton := $uiConfig.Get "showButton" -}}
   {{- $buttonText := printf "%v" (or .Site.Params.map_button_text "Interactive Map") -}}
 
   {{- /* Feed output uses only the static preview or a fallback link */ -}}
   {{- if $isFeed -}}
-    {{- if and $hasPreview (ne (trim $apiKey "") "") -}}
+    {{- if $hasPreview -}}
       <a href="{{ $osmLink | htmlEscape }}">
         <img src="{{ $lightPreview | safeURL }}" srcset="{{ $lightPreview | safeURL }} 1x, {{ $lightPreview2x | safeURL }} 2x" alt="Static map preview at {{ $latFormatted }}, {{ $lngFormatted }}" width="768" height="432" loading="lazy" decoding="async" />
       </a>
@@ -215,21 +215,10 @@
           position: relative;
         }
         .mb-map-preview picture,
-        .mb-map-preview img,
-        .mb-map-preview-placeholder {
+        .mb-map-preview img {
           display: block;
           width: 100%;
           height: auto;
-        }
-        .mb-map-preview img {
-          width: 100%;
-          height: auto;
-        }
-        .mb-map-preview-placeholder {
-          aspect-ratio: 16 / 9;
-          background-image: radial-gradient(circle at 20% 20%, rgba(255, 255, 255, 0.6), transparent 55%),
-            radial-gradient(circle at 80% 30%, rgba(59, 130, 246, 0.55), transparent 60%),
-            linear-gradient(135deg, rgba(14, 116, 144, 0.7), rgba(30, 64, 175, 0.8));
         }
         .mb-map-privacy-notice {
           position: absolute;
@@ -324,7 +313,7 @@
             {{- end -}}
           </label>
         </div>
-        <div class="mb-map-canvas mb-map-canvas--deferred">
+        <div class="mb-map-canvas">
           <iframe src="{{ $iframeURL | safeURL }}" loading="lazy" referrerpolicy="no-referrer" allowfullscreen title="OpenStreetMap map view" aria-label="Interactive OpenStreetMap view for {{ $latFormatted }}, {{ $lngFormatted }}"></iframe>
         </div>
       {{- else -}}
