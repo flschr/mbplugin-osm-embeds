@@ -1,5 +1,14 @@
 {{/*
   Privacy-friendly OpenStreetMap shortcode for Micro.blog.
+
+  This shortcode embeds OpenStreetMap views with optional privacy protection.
+  It validates coordinates, generates preview images, and provides an interactive map.
+
+  Required parameters:
+    - loc: Coordinates in format "latitude,longitude" (e.g., "48.1351,11.5820")
+
+  Optional parameters:
+    - zoom: Map zoom level from 0-19 (default: 14)
 */}}
 {{- $state := newScratch -}}
 {{- $state.Set "hasError" false -}}
@@ -43,8 +52,18 @@
   {{- end -}}
 {{- end -}}
 
-{{- /* Determine zoom level based on defaults and shortcode parameters */ -}}
+{{- /* Determine zoom level based on defaults and shortcode parameters
+
+       Zoom level validation:
+       - Valid range: 0-19 (OpenStreetMap standard)
+       - 0 = World view (entire planet visible)
+       - 19 = Maximum detail (individual buildings)
+       - Default: 14 (neighborhood/street level)
+
+       Priority: shortcode parameter > site config > hardcoded default (14)
+*/ -}}
 {{- if not ($state.Get "hasError") -}}
+  {{- /* Start with site-wide default zoom level */ -}}
   {{- $defaultZoomCandidate := printf "%v" (or .Site.Params.default_map_zoom "14") -}}
   {{- if (findRE `^\d+$` $defaultZoomCandidate) -}}
     {{- $defaultZoomInt := int $defaultZoomCandidate -}}
@@ -53,6 +72,7 @@
       {{- $state.Set "zoomString" (printf "%d" $defaultZoomInt) -}}
     {{- end -}}
   {{- end -}}
+  {{- /* Override with shortcode-specific zoom parameter if provided */ -}}
   {{- with .Get "zoom" -}}
     {{- $zoomCandidate := trim . " " -}}
     {{- if (findRE `^\d+$` $zoomCandidate) -}}
@@ -63,6 +83,7 @@
       {{- end -}}
     {{- end -}}
   {{- end -}}
+  {{- /* Generate OpenStreetMap permalink for fallbacks and RSS feeds */ -}}
   {{- $state.Set "osmLink" (printf "https://www.openstreetmap.org/?mlat=%.6f&mlon=%.6f#map=%s/%.6f/%.6f" ($state.Get "latValue") ($state.Get "lngValue") ($state.Get "zoomString") ($state.Get "latValue") ($state.Get "lngValue")) -}}
 {{- end -}}
 
@@ -81,7 +102,12 @@
   {{- $zoomString := $state.Get "zoomString" -}}
   {{- $osmLink := $state.Get "osmLink" -}}
 
-  {{- /* Feed detection */ -}}
+  {{- /* Feed detection
+
+         RSS/Atom/JSON feeds cannot contain interactive elements or JavaScript.
+         When rendering for feeds, we show only a static preview image with a link.
+         For HTML pages, we can show the full interactive experience.
+  */ -}}
   {{- $mediaSubType := "" -}}
   {{- with .Page.MediaType -}}
     {{- $mediaSubType = lower .SubType -}}
@@ -89,17 +115,26 @@
   {{- $isFeed := in (slice "rss" "json" "atom") $mediaSubType -}}
 
   {{- /* UI and preview configuration */ -}}
+  {{- /* API key validation: Check if preview functionality is available */ -}}
   {{- $apiKey := "" -}}
   {{- with .Site.Params.map_preview_api_key -}}
     {{- $apiKey = trim (printf "%v" .) " " -}}
   {{- end -}}
-  {{- $hasPreview := and (ne $apiKey "") (ne $apiKey "<nil>") -}}
+  {{- /* Robust check: API key must be non-empty and not contain placeholder values */ -}}
+  {{- $hasPreview := and (ne $apiKey "") (not (in (slice "<nil>" "nil" "null" "undefined") (lower $apiKey))) (gt (len $apiKey) 10) -}}
+
+  {{- /* Map style configuration with validation */ -}}
+  {{- /* Geoapify supported styles: osm-carto, osm-bright, osm-bright-grey, osm-bright-smooth,
+         klokantech-basic, osm-liberty, maptiler-3d, toner, toner-grey, positron,
+         positron-blue, positron-red, dark-matter, dark-matter-brown, dark-matter-dark-grey,
+         dark-matter-dark-purple, dark-matter-purple-roads, dark-matter-yellow-roads */ -}}
+  {{- $validStyles := slice "osm-carto" "osm-bright" "osm-bright-grey" "osm-bright-smooth" "klokantech-basic" "osm-liberty" "maptiler-3d" "toner" "toner-grey" "positron" "positron-blue" "positron-red" "dark-matter" "dark-matter-brown" "dark-matter-dark-grey" "dark-matter-dark-purple" "dark-matter-purple-roads" "dark-matter-yellow-roads" -}}
 
   {{- $styleLightCandidate := trim (printf "%v" (or .Site.Params.map_preview_style_light "osm-carto")) " " -}}
-  {{- $styleLight := cond (ne $styleLightCandidate "") $styleLightCandidate "osm-carto" -}}
+  {{- $styleLight := cond (and (ne $styleLightCandidate "") (in $validStyles $styleLightCandidate)) $styleLightCandidate "osm-carto" -}}
 
   {{- $styleDarkCandidate := trim (printf "%v" (or .Site.Params.map_preview_style_dark "osm-carto")) " " -}}
-  {{- $styleDark := cond (ne $styleDarkCandidate "") $styleDarkCandidate "osm-carto" -}}
+  {{- $styleDark := cond (and (ne $styleDarkCandidate "") (in $validStyles $styleDarkCandidate)) $styleDarkCandidate "osm-carto" -}}
 
   {{- /* Marker configuration */ -}}
   {{- $markerParams := printf "%v" (or .Site.Params.map_marker_params "type:awesome;color:red;size:60;shadow:no") -}}
@@ -137,33 +172,74 @@
       <a href="{{ $osmLink | htmlEscape }}">View this location on OpenStreetMap ({{ $latFormatted }}, {{ $lngFormatted }})</a>
     {{- end -}}
   {{- else -}}
-    {{- /* Calculate bounding box for the iframe */ -}}
+    {{- /* Calculate bounding box for the iframe embedding
+
+           OpenStreetMap's embedded iframe requires a bounding box (bbox) parameter.
+           We calculate this based on the zoom level and viewport dimensions.
+
+           Constants explained:
+           - 360.0: Total degrees longitude around the Earth
+           - 256.0: OSM tile size in pixels (standard tile dimension)
+           - 768.0: Map preview width in pixels (16:9 aspect ratio)
+           - 432.0: Map preview height in pixels (768 ÷ 16 × 9)
+           - 85.051129: Web Mercator projection latitude limit (beyond this, projection distorts infinitely)
+
+           Formula: At zoom level Z, the world is 2^Z tiles wide
+           → Each tile represents 360° ÷ 2^Z degrees
+           → Our viewport shows (width_pixels ÷ 256) × degrees_per_tile
+    */ -}}
     {{- $zoomFloat := float $zoomInt -}}
-    {{- $worldDegrees := div 360.0 (math.Pow 2.0 $zoomFloat) -}}
-    {{- $widthDegrees := mul $worldDegrees (div 768.0 256.0) -}}
-    {{- $heightDegrees := mul $worldDegrees (div 432.0 256.0) -}}
+
+    {{- /* Constants for bounding box calculation */ -}}
+    {{- $earthDegrees := 360.0 -}}
+    {{- $tileSize := 256.0 -}}
+    {{- $mapWidth := 768.0 -}}
+    {{- $mapHeight := 432.0 -}}
+    {{- $webMercatorLimit := 85.051129 -}}
+    {{- $longitudeMin := -180.0 -}}
+    {{- $longitudeMax := 180.0 -}}
+
+    {{- /* Calculate degrees per tile at current zoom level */ -}}
+    {{- $worldDegrees := div $earthDegrees (math.Pow 2.0 $zoomFloat) -}}
+
+    {{- /* Calculate viewport dimensions in degrees */ -}}
+    {{- $widthDegrees := mul $worldDegrees (div $mapWidth $tileSize) -}}
+    {{- $heightDegrees := mul $worldDegrees (div $mapHeight $tileSize) -}}
+
+    {{- /* Calculate bounding box edges centered on the marker */ -}}
     {{- $halfWidth := div $widthDegrees 2.0 -}}
     {{- $halfHeight := div $heightDegrees 2.0 -}}
     {{- $rawLeft := sub $lngValue $halfWidth -}}
     {{- $rawRight := add $lngValue $halfWidth -}}
     {{- $rawBottom := sub $latValue $halfHeight -}}
     {{- $rawTop := add $latValue $halfHeight -}}
-    {{- $left := math.Max -180.0 (math.Min 180.0 $rawLeft) -}}
-    {{- $right := math.Max -180.0 (math.Min 180.0 $rawRight) -}}
-    {{- $bottom := math.Max -85.051129 (math.Min 85.051129 $rawBottom) -}}
-    {{- $top := math.Max -85.051129 (math.Min 85.051129 $rawTop) -}}
+
+    {{- /* Clamp to valid Web Mercator bounds */ -}}
+    {{- $left := math.Max $longitudeMin (math.Min $longitudeMax $rawLeft) -}}
+    {{- $right := math.Max $longitudeMin (math.Min $longitudeMax $rawRight) -}}
+    {{- $bottom := math.Max (mul -1.0 $webMercatorLimit) (math.Min $webMercatorLimit $rawBottom) -}}
+    {{- $top := math.Max (mul -1.0 $webMercatorLimit) (math.Min $webMercatorLimit $rawTop) -}}
+
+    {{- /* Format coordinates for URL */ -}}
     {{- $leftFormatted := printf "%.6f" $left -}}
     {{- $rightFormatted := printf "%.6f" $right -}}
     {{- $bottomFormatted := printf "%.6f" $bottom -}}
     {{- $topFormatted := printf "%.6f" $top -}}
     {{- $iframeURL := printf "https://www.openstreetmap.org/export/embed.html?bbox=%s,%s,%s,%s&layer=mapnik&marker=%s,%s" $leftFormatted $bottomFormatted $rightFormatted $topFormatted $latFormatted $lngFormatted -}}
 
-    {{- /* Ensure unique IDs per page */ -}}
+    {{- /* Ensure unique IDs per page for multiple maps
+
+           Each map needs a unique ID for the toggle checkbox to work correctly.
+           We use page-scoped scratch storage to maintain a counter.
+           This ensures multiple maps on the same page don't conflict.
+    */ -}}
     {{- $page := .Page -}}
-    {{- $mapCount := add (or ($page.Scratch.Get "mb-map-count") 0) 1 -}}
+    {{- $currentCount := or ($page.Scratch.Get "mb-map-count") 0 -}}
+    {{- $mapCount := add $currentCount 1 -}}
     {{- $page.Scratch.Set "mb-map-count" $mapCount -}}
     {{- $toggleID := printf "mb-map-toggle-%d" $mapCount -}}
 
+    {{- /* Load CSS only once per page, even with multiple maps */ -}}
     {{- if not ($page.Scratch.Get "mb-map-style-loaded") -}}
       {{- $page.Scratch.Set "mb-map-style-loaded" true -}}
       <style>
@@ -342,40 +418,100 @@
       </style>
     {{- end -}}
 
+    {{- /* Load JavaScript only once per page, even with multiple maps */ -}}
     {{- if not ($page.Scratch.Get "mb-map-loading-script-loaded") -}}
       {{- $page.Scratch.Set "mb-map-loading-script-loaded" true -}}
       <script>
+        /**
+         * Map preview image loading handler
+         *
+         * This script handles three scenarios:
+         * 1. Image loads successfully → Show preview
+         * 2. Image fails to load → Show fallback link to OSM
+         * 3. Image already cached → Show immediately
+         *
+         * No timeout is used - we wait for definitive load/error events.
+         */
         document.addEventListener('DOMContentLoaded', function() {
           document.querySelectorAll('.mb-map-preview-content').forEach(function(content) {
             var img = content.querySelector('img');
-            if (img) {
-              var showContent = function() {
-                content.classList.add('loaded');
-                var placeholder = content.previousElementSibling;
-                if (placeholder && placeholder.classList.contains('mb-map-loading-placeholder')) {
-                  placeholder.style.display = 'none';
-                }
-              };
+            if (!img) return;
 
-              // Set a timeout to show content even if image doesn't load
-              var timeout = setTimeout(function() {
-                showContent();
-              }, 3000);
+            var placeholder = content.previousElementSibling;
 
-              if (img.complete && img.naturalHeight !== 0) {
-                clearTimeout(timeout);
-                showContent();
-              } else {
-                img.addEventListener('load', function() {
-                  clearTimeout(timeout);
-                  showContent();
-                });
-
-                img.addEventListener('error', function() {
-                  clearTimeout(timeout);
-                  showContent();
-                });
+            /**
+             * Show the preview image (successful load)
+             */
+            var showContent = function() {
+              content.classList.add('loaded');
+              if (placeholder && placeholder.classList.contains('mb-map-loading-placeholder')) {
+                placeholder.style.display = 'none';
               }
+            };
+
+            /**
+             * Show fallback when image fails to load
+             * This could happen due to:
+             * - Invalid/expired API key
+             * - Network errors
+             * - Invalid map style configuration
+             */
+            var showFallback = function() {
+              // Get the OpenStreetMap link from the label
+              var label = content.querySelector('label');
+              if (label) {
+                var toggleId = label.getAttribute('for');
+                var osmLink = '';
+
+                // Try to extract OSM link from the page context
+                // If we can't find it, construct a basic one from the image alt or title
+                var wrapper = content.closest('.mb-map-wrapper');
+                if (wrapper) {
+                  var iframe = wrapper.querySelector('iframe');
+                  if (iframe) {
+                    var iframeSrc = iframe.getAttribute('src');
+                    // Extract coordinates from iframe src if possible
+                    var match = iframeSrc.match(/marker=([^&]+)/);
+                    if (match) {
+                      var coords = match[1].split(',');
+                      osmLink = 'https://www.openstreetmap.org/?mlat=' + coords[0] + '&mlon=' + coords[1];
+                    }
+                  }
+                }
+
+                // Fallback if we couldn't extract the link
+                if (!osmLink) {
+                  osmLink = 'https://www.openstreetmap.org/';
+                }
+
+                // Replace content with fallback message
+                content.innerHTML = '<div style="padding: 2rem; text-align: center; background: #fee2e2; color: #991b1b; border-radius: inherit;">' +
+                  '<p style="margin: 0 0 1rem 0;"><strong>Map preview could not be loaded.</strong></p>' +
+                  '<p style="margin: 0;"><a href="' + osmLink + '" style="color: #991b1b; text-decoration: underline;">View location on OpenStreetMap</a></p>' +
+                  '</div>';
+                content.classList.add('loaded');
+              }
+
+              if (placeholder && placeholder.classList.contains('mb-map-loading-placeholder')) {
+                placeholder.style.display = 'none';
+              }
+            };
+
+            // Check if image is already loaded (cached)
+            if (img.complete && img.naturalHeight !== 0) {
+              showContent();
+            } else if (img.complete && img.naturalHeight === 0) {
+              // Image loaded but has no dimensions = failed to load
+              showFallback();
+            } else {
+              // Image is still loading, attach event listeners
+              img.addEventListener('load', function() {
+                showContent();
+              });
+
+              img.addEventListener('error', function() {
+                showFallback();
+              });
             }
           });
         });
