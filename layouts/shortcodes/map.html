@@ -198,6 +198,23 @@
           overflow: hidden;
           border-radius: inherit;
         }
+        .mb-map-loading-placeholder {
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          width: 100%;
+          aspect-ratio: 16 / 9;
+          background: #f3f4f6;
+          color: #6b7280;
+          font-size: 1rem;
+          border-radius: inherit;
+        }
+        .mb-map-preview-content {
+          display: none;
+        }
+        .mb-map-preview-content.loaded {
+          display: block;
+        }
         .mb-map-preview label {
           display: block;
           cursor: pointer;
@@ -317,8 +334,40 @@
             background: #1f2937;
             color: #f3f4f6;
           }
+          .mb-map-loading-placeholder {
+            background: #1f2937;
+            color: #9ca3af;
+          }
         }
       </style>
+    {{- end -}}
+
+    {{- if not ($page.Scratch.Get "mb-map-loading-script-loaded") -}}
+      {{- $page.Scratch.Set "mb-map-loading-script-loaded" true -}}
+      <script>
+        document.addEventListener('DOMContentLoaded', function() {
+          document.querySelectorAll('.mb-map-preview-content').forEach(function(content) {
+            var img = content.querySelector('img');
+            if (img) {
+              if (img.complete && img.naturalHeight !== 0) {
+                content.classList.add('loaded');
+                var placeholder = content.previousElementSibling;
+                if (placeholder && placeholder.classList.contains('mb-map-loading-placeholder')) {
+                  placeholder.style.display = 'none';
+                }
+              } else {
+                img.addEventListener('load', function() {
+                  content.classList.add('loaded');
+                  var placeholder = content.previousElementSibling;
+                  if (placeholder && placeholder.classList.contains('mb-map-loading-placeholder')) {
+                    placeholder.style.display = 'none';
+                  }
+                });
+              }
+            }
+          });
+        });
+      </script>
     {{- end -}}
 
     <div class="mb-map-wrapper">
@@ -326,21 +375,24 @@
         {{- /* With API key: show preview with toggle */ -}}
         <input type="checkbox" id="{{ $toggleID }}" class="mb-map-toggle" />
         <div class="mb-map-preview{{ if $showPrivacyNotice }} mb-map-preview--with-notice{{ end }}{{ if $showButton }} mb-map-preview--with-button{{ end }}">
-          <label for="{{ $toggleID }}">
-            <picture>
-              <source media="(prefers-color-scheme: dark)" srcset="{{ $darkPreview | safeURL }} 1x, {{ $darkPreview2x | safeURL }} 2x" />
-              <source media="(prefers-color-scheme: light)" srcset="{{ $lightPreview | safeURL }} 1x, {{ $lightPreview2x | safeURL }} 2x" />
-              <img src="{{ $lightPreview | safeURL }}" srcset="{{ $lightPreview | safeURL }} 1x, {{ $lightPreview2x | safeURL }} 2x" alt="Static map preview at {{ $latFormatted }}, {{ $lngFormatted }}" width="768" height="432" loading="lazy" decoding="async" />
-            </picture>
-            {{- if $showPrivacyNotice -}}
-              <div class="mb-map-privacy-notice">{{ $privacyNoticeText }}</div>
-            {{- end -}}
-            {{- if $showButton -}}
-              <div class="mb-map-overlay">
-                <span class="button">{{ $buttonText }}</span>
-              </div>
-            {{- end -}}
-          </label>
+          <div class="mb-map-loading-placeholder">Loading map preview...</div>
+          <div class="mb-map-preview-content">
+            <label for="{{ $toggleID }}">
+              <picture>
+                <source media="(prefers-color-scheme: dark)" srcset="{{ $darkPreview | safeURL }} 1x, {{ $darkPreview2x | safeURL }} 2x" />
+                <source media="(prefers-color-scheme: light)" srcset="{{ $lightPreview | safeURL }} 1x, {{ $lightPreview2x | safeURL }} 2x" />
+                <img src="{{ $lightPreview | safeURL }}" srcset="{{ $lightPreview | safeURL }} 1x, {{ $lightPreview2x | safeURL }} 2x" alt="Static map preview at {{ $latFormatted }}, {{ $lngFormatted }}" width="768" height="432" loading="lazy" decoding="async" />
+              </picture>
+              {{- if $showPrivacyNotice -}}
+                <div class="mb-map-privacy-notice">{{ $privacyNoticeText }}</div>
+              {{- end -}}
+              {{- if $showButton -}}
+                <div class="mb-map-overlay">
+                  <span class="button">{{ $buttonText }}</span>
+                </div>
+              {{- end -}}
+            </label>
+          </div>
         </div>
         <div class="mb-map-canvas">
           <iframe src="{{ $iframeURL | safeURL }}" loading="lazy" referrerpolicy="no-referrer" allowfullscreen title="OpenStreetMap map view" aria-label="Interactive OpenStreetMap view for {{ $latFormatted }}, {{ $lngFormatted }}"></iframe>
