@@ -1,6 +1,6 @@
 # Privacy-Friendly OSM Maps for Micro.blog
 
-![Privacy-Friendly Maps hero](docs/hero.svg)
+![OSM Embeds for Micro.blog](logo.png)
 
 Embed OpenStreetMap views in your Micro.blog posts with optional privacy protection. Readers see a static preview first, then can opt-in to load the interactive map.
 
@@ -24,7 +24,7 @@ Embed OpenStreetMap views in your Micro.blog posts with optional privacy protect
 
 ## Example
 
-![Embedded OSM in a Micro.blog posting](docs/hero.svg)
+![Embedded OSM in a Micro.blog posting](preview.webp)
 
 Live example: [fischr.org/2017/09/03/oben-links-am-lago-di](https://fischr.org/2017/09/03/oben-links-am-lago-di)
 
