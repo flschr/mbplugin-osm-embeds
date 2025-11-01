@@ -25,7 +25,7 @@
     },
     {
       "field": "params.default_map_zoom",
-      "label": "Default zoom level",
+      "label": "Default zoom level (0-19)",
       "type": "string",
       "default": "14"
     },
