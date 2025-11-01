@@ -267,25 +267,34 @@
           position: relative;
           overflow: hidden;
           border-radius: inherit;
+          aspect-ratio: 16 / 9;
         }
         .mb-map-loading-placeholder {
+          position: absolute;
+          top: 0;
+          left: 0;
           display: flex;
           align-items: center;
           justify-content: center;
           width: 100%;
-          aspect-ratio: 16 / 9;
+          height: 100%;
           background: #f3f4f6;
           color: #6b7280;
           font-size: 1rem;
           border-radius: inherit;
+          z-index: 10;
+          transition: opacity 0.2s ease;
+        }
+        .mb-map-loading-placeholder.hidden {
+          opacity: 0;
+          pointer-events: none;
         }
         .mb-map-preview-content {
-          display: none;
+          position: relative;
           opacity: 0;
           transition: opacity 0.2s ease;
         }
         .mb-map-preview-content.loaded {
-          display: block;
           opacity: 1;
         }
         .mb-map-preview label {
@@ -446,7 +455,7 @@
               var showContent = function() {
                 content.classList.add('loaded');
                 if (placeholder && placeholder.classList.contains('mb-map-loading-placeholder')) {
-                  placeholder.style.display = 'none';
+                  placeholder.classList.add('hidden');
                 }
               };
 
@@ -494,7 +503,7 @@
                 }
 
                 if (placeholder && placeholder.classList.contains('mb-map-loading-placeholder')) {
-                  placeholder.style.display = 'none';
+                  placeholder.classList.add('hidden');
                 }
               };
 
@@ -538,7 +547,7 @@
               <picture>
                 <source media="(prefers-color-scheme: dark)" srcset="{{ $darkPreview | safeURL }} 1x, {{ $darkPreview2x | safeURL }} 2x" />
                 <source media="(prefers-color-scheme: light)" srcset="{{ $lightPreview | safeURL }} 1x, {{ $lightPreview2x | safeURL }} 2x" />
-                <img src="{{ $lightPreview | safeURL }}" srcset="{{ $lightPreview | safeURL }} 1x, {{ $lightPreview2x | safeURL }} 2x" alt="" width="768" height="432" loading="lazy" decoding="async" />
+                <img src="{{ $lightPreview | safeURL }}" srcset="{{ $lightPreview | safeURL }} 1x, {{ $lightPreview2x | safeURL }} 2x" alt="" width="768" height="432" loading="eager" decoding="async" />
               </picture>
               {{- if $showPrivacyNotice -}}
                 <div class="mb-map-privacy-notice">{{ $privacyNoticeText }}</div>
