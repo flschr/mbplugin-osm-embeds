@@ -114,11 +114,11 @@
   {{- $darkPreview2x := printf "%s?style=%s&width=1536&height=864&center=lonlat:%s,%s&zoom=%s&marker=%s&apiKey=%s" $previewBase (urlquery $styleDark) $lngFormatted $latFormatted $zoomString (urlquery $markerQuery) $apiKey -}}
 
   {{- /* Privacy mode configuration */ -}}
-  {{- $privacyMode := true -}}
+  {{- $privacyMode := false -}}
   {{- if isset .Site.Params "privacy_mode" -}}
     {{- $modeRaw := lower (trim (printf "%v" .Site.Params.privacy_mode) " ") -}}
-    {{- if in (slice "false" "0" "no") $modeRaw -}}
-      {{- $privacyMode = false -}}
+    {{- if in (slice "true" "1" "yes") $modeRaw -}}
+      {{- $privacyMode = true -}}
     {{- end -}}
   {{- end -}}
 
