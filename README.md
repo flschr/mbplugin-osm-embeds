@@ -64,14 +64,12 @@ Explore customization options with these interactive playgrounds:
 
 ## Changelog
 
-### 1.0.2 (2025-11)
+### 1.0.2
 - Fixed map preview not loading on mobile devices (improved DOMContentLoaded handling)
-
-### 1.0.1 (2025-01)
 - Improved code stability and maintainability
 - Enhanced error handling and validation
 
-### 1.0.0 (2025-01)
+### 1.0.0
 - Initial public release
 - Privacy-friendly OpenStreetMap embeds with optional static previews
 - Support for custom map styles (light/dark mode)
