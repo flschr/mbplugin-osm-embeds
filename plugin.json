@@ -19,13 +19,13 @@
     },
     {
       "field": "params.show_map_button",
-      "label": "Show interactive map button",
+      "label": "Show map button",
       "type": "boolean",
       "default": true
     },
     {
       "field": "params.map_button_text",
-      "label": "Interactive map button text",
+      "label": "Button text",
       "type": "string",
       "default": "Interactive Map"
     },
@@ -37,19 +37,19 @@
     },
     {
       "field": "params.map_preview_style_light",
-      "label": "Geoapify preview style (light mode)",
+      "label": "Light mode preview style",
       "type": "string",
       "default": "osm-carto"
     },
     {
       "field": "params.map_preview_style_dark",
-      "label": "Geoapify preview style (dark mode)",
+      "label": "Dark mode preview style",
       "type": "string",
       "default": "osm-carto"
     },
     {
       "field": "params.map_marker_params",
-      "label": "Custom marker parameters (e.g., type:awesome;color:red;size:60;shadow:no)",
+      "label": "Custom marker",
       "type": "string",
       "default": "type:awesome;color:red;size:60;shadow:no"
     },
