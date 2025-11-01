@@ -36,6 +36,7 @@ Install the plugin and configure optional settings:
 - **Privacy banner text** – Text for optional privacy overlay
 - **Button text** - Text for the alternative button (displayed instead of privacy banner)
 - **Geoapify API Key** – Necessary for static preview images
+- **Custom marker** - Code to display individual marker on static preview images
 - **Default Zoom** – Used when no zoom is specified in the shortcode
 - **Preview Styles** – Map design for light/dark mode
 
