@@ -92,23 +92,31 @@
   {{- $isFeed := in (slice "rss" "json" "atom") $mediaSubType -}}
 
   {{- /* Static preview configuration */ -}}
-  {{- $apiKey := "" -}}
+  {{- $previewConfig := newScratch -}}
+  {{- $previewConfig.Set "apiKey" "" -}}
   {{- with .Site.Params.map_preview_api_key -}}
-    {{- $apiKey = (trim (printf "%v" .) " ") -}}
+    {{- $previewConfig.Set "apiKey" (trim (printf "%v" .) " ") -}}
   {{- end -}}
+  {{- $apiKey := $previewConfig.Get "apiKey" -}}
   {{- $hasPreview := and (ne $apiKey "") (ne $apiKey "<nil>") -}}
-  {{- $styleFallback := printf "%v" (or .Site.Params.map_preview_style "osm-carto") -}}
-  {{- if eq (trim $styleFallback " ") "" -}}
-    {{- $styleFallback = "osm-carto" -}}
+  {{- $previewConfig.Set "styleFallback" "osm-carto" -}}
+  {{- $styleFallbackCandidate := printf "%v" (or .Site.Params.map_preview_style "osm-carto") -}}
+  {{- if ne (trim $styleFallbackCandidate " ") "" -}}
+    {{- $previewConfig.Set "styleFallback" $styleFallbackCandidate -}}
   {{- end -}}
-  {{- $styleLight := printf "%v" (or .Site.Params.map_preview_style_light $styleFallback) -}}
-  {{- if eq (trim $styleLight " ") "" -}}
-    {{- $styleLight = $styleFallback -}}
+  {{- $styleFallback := $previewConfig.Get "styleFallback" -}}
+  {{- $previewConfig.Set "styleLight" $styleFallback -}}
+  {{- $styleLightCandidate := printf "%v" (or .Site.Params.map_preview_style_light $styleFallback) -}}
+  {{- if ne (trim $styleLightCandidate " ") "" -}}
+    {{- $previewConfig.Set "styleLight" $styleLightCandidate -}}
   {{- end -}}
-  {{- $styleDark := printf "%v" (or .Site.Params.map_preview_style_dark $styleFallback) -}}
-  {{- if eq (trim $styleDark " ") "" -}}
-    {{- $styleDark = $styleFallback -}}
+  {{- $styleLight := $previewConfig.Get "styleLight" -}}
+  {{- $previewConfig.Set "styleDark" $styleFallback -}}
+  {{- $styleDarkCandidate := printf "%v" (or .Site.Params.map_preview_style_dark $styleFallback) -}}
+  {{- if ne (trim $styleDarkCandidate " ") "" -}}
+    {{- $previewConfig.Set "styleDark" $styleDarkCandidate -}}
   {{- end -}}
+  {{- $styleDark := $previewConfig.Get "styleDark" -}}
 
   {{- $previewBase := "https://maps.geoapify.com/v1/staticmap" -}}
   {{- $markerQuery := printf "lonlat:%s,%s;type:awesome;color:%%23dd2e44;size:medium" $lngFormatted $latFormatted -}}
@@ -119,15 +127,16 @@
   {{- $fallbackPreview := printf "%s?style=%s&width=768&height=432&center=lonlat:%s,%s&zoom=%s&marker=%s&apiKey=%s" $previewBase (urlquery $styleFallback) $lngFormatted $latFormatted $zoomString (urlquery $markerQuery) $apiKey -}}
   {{- $fallbackPreview2x := printf "%s?style=%s&width=1536&height=864&center=lonlat:%s,%s&zoom=%s&marker=%s&apiKey=%s" $previewBase (urlquery $styleFallback) $lngFormatted $latFormatted $zoomString (urlquery $markerQuery) $apiKey -}}
 
-  {{- $showPrivacyNotice := true -}}
+  {{- $previewConfig.Set "showPrivacyNotice" true -}}
   {{- with .Site.Params.show_privacy_notice -}}
     {{- $noticeRaw := lower (trim (printf "%v" .) " ") -}}
     {{- if in (slice "false" "0" "no") $noticeRaw -}}
-      {{- $showPrivacyNotice = false -}}
+      {{- $previewConfig.Set "showPrivacyNotice" false -}}
     {{- else if in (slice "true" "1" "yes") $noticeRaw -}}
-      {{- $showPrivacyNotice = true -}}
+      {{- $previewConfig.Set "showPrivacyNotice" true -}}
     {{- end -}}
   {{- end -}}
+  {{- $showPrivacyNotice := $previewConfig.Get "showPrivacyNotice" -}}
   {{- $privacyNoticeText := printf "%v" (or .Site.Params.map_privacy_notice_text "We only load OpenStreetMap after you interact with the preview.") -}}
 
   {{- /* Feed output uses only the static preview or a fallback link */ -}}
