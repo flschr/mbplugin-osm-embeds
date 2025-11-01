@@ -214,7 +214,7 @@
       const width = retina ? 1536 : 768;
       const height = retina ? 864 : 432;
       const encodedStyle = encodeURIComponent(style || 'osm-carto');
-      const marker = encodeURIComponent(`lonlat:${lng.toFixed(6)},${lat.toFixed(6)};type:awesome;color:%23dd2e44;size:medium`);
+      const marker = encodeURIComponent(`lonlat:${lng.toFixed(6)},${lat.toFixed(6)};type:awesome;color:#dd2e44;size:large`);
       return `https://maps.geoapify.com/v1/staticmap?style=${encodedStyle}&width=${width}&height=${height}&center=lonlat:${lng.toFixed(6)},${lat.toFixed(6)}&zoom=${zoom}&marker=${marker}&apiKey=${encodeURIComponent(apiKey)}`;
     }
 
@@ -265,10 +265,6 @@
       } else {
         staticPreview.hidden = true;
         staticFallback.hidden = false;
-      }
-
-      if (noticeText) {
-        staticFallback.dataset.notice = noticeText;
       }
     }
 
