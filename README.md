@@ -38,9 +38,11 @@ The flow on a typical Micro.blog page:
 
 In feeds (RSS/JSON/Atom) the shortcode degrades gracefully and renders only a linked static image or, if no preview key is configured, a simple OpenStreetMap link.
 
-## Testing & Browser Validator
+## Testing & Geoapify Style Reference
 
-Use the in-browser playground to assemble shortcodes, preview the iframe, and test static map URLs: [`docs/index.html`](docs/index.html).
+Use the in-browser playground to assemble shortcodes and preview maps: [`docs/index.html`](docs/index.html).
+
+For the complete list of available map styles, see the [Geoapify Static Maps API documentation](https://www.geoapify.com/static-maps-api/).
 
 ## Plugin Settings
 
@@ -57,7 +59,11 @@ All plugin options live under `params` in `plugin.json` and are exposed in Micro
 1. Create an account at [Geoapify](https://www.geoapify.com/).
 2. Generate an API key (the free tier covers 3,000 static map requests/day).
 3. Paste the key into the Micro.blog plugin configuration.
-4. Optional: customise the light/dark styles using any Geoapify static map style slug (`osm-carto`, `osm-bright`, `dark-matter-yellow-roads`, etc.).
+4. Optional: customise the light/dark styles using any Geoapify static map style slug. Available styles include:
+   - **Vector styles** (customizable): `osm-bright` (default), `osm-bright-grey`, `osm-bright-smooth`, `osm-liberty`, `klokantech-basic`, `positron`, `dark-matter`, `toner`, `toner-grey`
+   - **Raster style**: `osm-carto`
+
+   See the [Geoapify Static Maps API documentation](https://www.geoapify.com/static-maps-api/) for the complete list.
 
 ## Zoom Level Cheatsheet
 

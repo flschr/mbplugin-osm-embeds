@@ -152,7 +152,7 @@
           </label>
           <label>
             Base style
-            <input type="text" id="styleBase" name="styleBase" value="osm-carto" placeholder="osm-carto">
+            <input type="text" id="styleBase" name="styleBase" value="osm-bright" placeholder="osm-bright">
           </label>
           <label>
             Light mode style
@@ -213,7 +213,7 @@
     function makeStaticUrl(style, lat, lng, zoom, apiKey, retina = false) {
       const width = retina ? 1536 : 768;
       const height = retina ? 864 : 432;
-      const encodedStyle = encodeURIComponent(style || 'osm-carto');
+      const encodedStyle = encodeURIComponent(style || 'osm-bright');
       const marker = encodeURIComponent(`lonlat:${lng.toFixed(6)},${lat.toFixed(6)};type:awesome;color:#dd2e44;size:large`);
       return `https://maps.geoapify.com/v1/staticmap?style=${encodedStyle}&width=${width}&height=${height}&center=lonlat:${lng.toFixed(6)},${lat.toFixed(6)}&zoom=${zoom}&marker=${marker}&apiKey=${encodeURIComponent(apiKey)}`;
     }
@@ -223,7 +223,7 @@
       const lng = parseFloat(form.lng.value);
       const zoom = parseInt(form.zoom.value, 10);
       const apiKey = form.apiKey.value.trim();
-      const styleBase = form.styleBase.value.trim() || 'osm-carto';
+      const styleBase = form.styleBase.value.trim() || 'osm-bright';
       const styleLight = form.styleLight.value.trim() || styleBase;
       const styleDark = form.styleDark.value.trim() || styleBase;
       const noticeText = form.noticeText.value.trim();
