@@ -132,7 +132,7 @@
   {{- if $isFeed -}}
     {{- if $hasPreview -}}
       <a href="{{ $osmLink | htmlEscape }}">
-        <img src="{{ $lightPreview | safeURL }}" srcset="{{ $lightPreview | safeURL }} 1x, {{ $lightPreview2x | safeURL }} 2x" alt="Static map preview at {{ $latFormatted }}, {{ $lngFormatted }}" width="768" height="432" loading="lazy" decoding="async" />
+        <img src="{{ $lightPreview | safeURL }}" srcset="{{ $lightPreview | safeURL }} 1x, {{ $lightPreview2x | safeURL }} 2x" alt="" width="768" height="432" loading="lazy" decoding="async" />
       </a>
     {{- else -}}
       <a href="{{ $osmLink | htmlEscape }}">View this location on OpenStreetMap ({{ $latFormatted }}, {{ $lngFormatted }})</a>
@@ -394,7 +394,7 @@
               <picture>
                 <source media="(prefers-color-scheme: dark)" srcset="{{ $darkPreview | safeURL }} 1x, {{ $darkPreview2x | safeURL }} 2x" />
                 <source media="(prefers-color-scheme: light)" srcset="{{ $lightPreview | safeURL }} 1x, {{ $lightPreview2x | safeURL }} 2x" />
-                <img src="{{ $lightPreview | safeURL }}" srcset="{{ $lightPreview | safeURL }} 1x, {{ $lightPreview2x | safeURL }} 2x" alt="Static map preview at {{ $latFormatted }}, {{ $lngFormatted }}" width="768" height="432" loading="lazy" decoding="async" />
+                <img src="{{ $lightPreview | safeURL }}" srcset="{{ $lightPreview | safeURL }} 1x, {{ $lightPreview2x | safeURL }} 2x" alt="" width="768" height="432" loading="lazy" decoding="async" />
               </picture>
               {{- if $showPrivacyNotice -}}
                 <div class="mb-map-privacy-notice">{{ $privacyNoticeText }}</div>
