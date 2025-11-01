@@ -264,7 +264,7 @@
           outline-offset: 4px;
         }
         .mb-map-canvas {
-          display: none;
+          display: block;
           border-radius: 0.75rem;
           overflow: hidden;
           background: #dbeafe;
@@ -274,6 +274,9 @@
           width: 100%;
           aspect-ratio: 16 / 9;
           background: #dbeafe;
+        }
+        .mb-map-toggle ~ .mb-map-canvas {
+          display: none;
         }
         .mb-map-toggle:checked ~ .mb-map-preview {
           display: none;
@@ -330,30 +333,35 @@
     {{- end -}}
 
     <div class="mb-map-wrapper">
-      <input type="checkbox" id="{{ $toggleID }}" class="mb-map-toggle" aria-describedby="{{ $hintID }}" />
-      <div class="mb-map-preview">
-        <label for="{{ $toggleID }}">
-          {{- if and $hasPreview (ne (trim $apiKey "") "") -}}
+      {{- if $hasPreview -}}
+        {{- /* With API key: show preview with toggle */ -}}
+        <input type="checkbox" id="{{ $toggleID }}" class="mb-map-toggle" aria-describedby="{{ $hintID }}" />
+        <div class="mb-map-preview">
+          <label for="{{ $toggleID }}">
             <picture>
               <source media="(prefers-color-scheme: dark)" srcset="{{ $darkPreview | safeURL }} 1x, {{ $darkPreview2x | safeURL }} 2x" />
               <source media="(prefers-color-scheme: light)" srcset="{{ $lightPreview | safeURL }} 1x, {{ $lightPreview2x | safeURL }} 2x" />
               <img src="{{ $fallbackPreview | safeURL }}" srcset="{{ $fallbackPreview | safeURL }} 1x, {{ $fallbackPreview2x | safeURL }} 2x" alt="Static map preview at {{ $latFormatted }}, {{ $lngFormatted }}" width="768" height="432" loading="lazy" decoding="async" />
             </picture>
-          {{- else -}}
-            <div class="mb-map-preview-placeholder" aria-hidden="true"></div>
-          {{- end -}}
-          <div class="mb-map-overlay">
-            {{- if $showPrivacyNotice -}}
-              <span class="mb-map-overlay__text">{{ $privacyNoticeText | htmlEscape }}</span>
-            {{- end -}}
-            <span class="mb-map-overlay__action">Activate map</span>
-          </div>
-        </label>
-      </div>
-      <div class="mb-map-canvas mb-map-canvas--deferred">
-        <iframe src="{{ $iframeURL | safeURL }}" loading="lazy" referrerpolicy="no-referrer" allowfullscreen title="OpenStreetMap map view" aria-label="Interactive OpenStreetMap view for {{ $latFormatted }}, {{ $lngFormatted }}"></iframe>
-      </div>
-      <p class="mb-map-hint" id="{{ $hintID }}">Coordinates: {{ $latFormatted }}, {{ $lngFormatted }} · Zoom {{ $zoomString }}.{{ if $showPrivacyNotice }} {{ $privacyNoticeText | htmlEscape }}{{ else }} The map loads on demand to protect your privacy.{{ end }}</p>
+            <div class="mb-map-overlay">
+              {{- if $showPrivacyNotice -}}
+                <span class="mb-map-overlay__text">{{ $privacyNoticeText | htmlEscape }}</span>
+              {{- end -}}
+              <span class="mb-map-overlay__action">Activate map</span>
+            </div>
+          </label>
+        </div>
+        <div class="mb-map-canvas mb-map-canvas--deferred">
+          <iframe src="{{ $iframeURL | safeURL }}" loading="lazy" referrerpolicy="no-referrer" allowfullscreen title="OpenStreetMap map view" aria-label="Interactive OpenStreetMap view for {{ $latFormatted }}, {{ $lngFormatted }}"></iframe>
+        </div>
+        <p class="mb-map-hint" id="{{ $hintID }}">Coordinates: {{ $latFormatted }}, {{ $lngFormatted }} · Zoom {{ $zoomString }}.{{ if $showPrivacyNotice }} {{ $privacyNoticeText | htmlEscape }}{{ else }} The map loads on demand to protect your privacy.{{ end }}</p>
+      {{- else -}}
+        {{- /* Without API key: show map directly */ -}}
+        <div class="mb-map-canvas">
+          <iframe src="{{ $iframeURL | safeURL }}" loading="lazy" referrerpolicy="no-referrer" allowfullscreen title="OpenStreetMap map view" aria-label="Interactive OpenStreetMap view for {{ $latFormatted }}, {{ $lngFormatted }}"></iframe>
+        </div>
+        <p class="mb-map-hint">Coordinates: {{ $latFormatted }}, {{ $lngFormatted }} · Zoom {{ $zoomString }}.</p>
+      {{- end -}}
     </div>
   {{- end -}}
 {{- end -}}
