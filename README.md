@@ -55,7 +55,7 @@ Without an API key, the map embeds directly. With Geoapify you get a clickable p
 Explore customization options with these interactive playgrounds:
 
 - **[Pin Playground](https://apidocs.geoapify.com/playground/icon/)** – Design custom map markers
-- **[Color & Style Playground](https://www.geoapify.com/static-maps-api/)** – Test different map styles and colors to use for light- and dark-mode
+- **[Color & Style Playground](https://www.geoapify.com/static-maps-api/)** – Test different map styles and colors to use for light- and dark-mode. Here is the **[overview of the different map styles](https://apidocs.geoapify.com/docs/maps/map-tiles/)** use these names in the plugin configuration.
 
 ## Notes
 
