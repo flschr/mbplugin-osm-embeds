@@ -102,21 +102,25 @@
   {{- end -}}
   {{- $apiKey := $uiConfig.Get "apiKey" -}}
   {{- $hasPreview := and (ne $apiKey "") (ne $apiKey "<nil>") -}}
-  {{- $uiConfig.Set "styleLight" "osm-bright" -}}
-  {{- $styleLightCandidate := printf "%v" (or .Site.Params.map_preview_style_light "osm-bright") -}}
+  {{- $uiConfig.Set "styleLight" "osm-carto" -}}
+  {{- $styleLightCandidate := printf "%v" (or .Site.Params.map_preview_style_light "osm-carto") -}}
   {{- if ne (trim $styleLightCandidate " ") "" -}}
     {{- $uiConfig.Set "styleLight" $styleLightCandidate -}}
   {{- end -}}
   {{- $styleLight := $uiConfig.Get "styleLight" -}}
-  {{- $uiConfig.Set "styleDark" "osm-bright" -}}
-  {{- $styleDarkCandidate := printf "%v" (or .Site.Params.map_preview_style_dark "osm-bright") -}}
+  {{- $uiConfig.Set "styleDark" "osm-carto" -}}
+  {{- $styleDarkCandidate := printf "%v" (or .Site.Params.map_preview_style_dark "osm-carto") -}}
   {{- if ne (trim $styleDarkCandidate " ") "" -}}
     {{- $uiConfig.Set "styleDark" $styleDarkCandidate -}}
   {{- end -}}
   {{- $styleDark := $uiConfig.Get "styleDark" -}}
 
+  {{- /* Marker configuration */ -}}
+  {{- $markerParams := printf "%v" (or .Site.Params.map_marker_params "type:awesome;color:red;size:60;shadow:no") -}}
+  {{- $markerParams = trim $markerParams " " -}}
+
   {{- $previewBase := "https://maps.geoapify.com/v1/staticmap" -}}
-  {{- $markerQuery := printf "lonlat:%s,%s;type:awesome;color:#dd2e44;size:x-large;icon:circle;iconsize:large" $lngFormatted $latFormatted -}}
+  {{- $markerQuery := printf "lonlat:%s,%s;%s" $lngFormatted $latFormatted $markerParams -}}
   {{- $lightPreview := printf "%s?style=%s&width=768&height=432&center=lonlat:%s,%s&zoom=%s&marker=%s&apiKey=%s" $previewBase (urlquery $styleLight) $lngFormatted $latFormatted $zoomString (urlquery $markerQuery) $apiKey -}}
   {{- $lightPreview2x := printf "%s?style=%s&width=1536&height=864&center=lonlat:%s,%s&zoom=%s&marker=%s&apiKey=%s" $previewBase (urlquery $styleLight) $lngFormatted $latFormatted $zoomString (urlquery $markerQuery) $apiKey -}}
   {{- $darkPreview := printf "%s?style=%s&width=768&height=432&center=lonlat:%s,%s&zoom=%s&marker=%s&apiKey=%s" $previewBase (urlquery $styleDark) $lngFormatted $latFormatted $zoomString (urlquery $markerQuery) $apiKey -}}

@@ -46,11 +46,12 @@ For the complete list of available map styles, see the [Geoapify Static Maps API
 
 ## Plugin Settings
 
-All plugin options live under `params` in `plugin.json` and are exposed in Micro.blog’s plugin editor:
+All plugin options live under `params` in `plugin.json` and are exposed in Micro.blog's plugin editor:
 
 - `map_preview_api_key` – Optional Geoapify key for static preview images.
 - `default_map_zoom` – Fallback zoom level used when the shortcode omits `zoom`.
-- `map_preview_style`, `map_preview_style_light`, `map_preview_style_dark` – Static map styles (see Geoapify style catalogue).
+- `map_preview_style_light`, `map_preview_style_dark` – Static map styles (defaults to `osm-carto`, see Geoapify style catalogue).
+- `map_marker_params` – Custom marker parameters in semicolon-separated format (default: `type:awesome;color:red;size:60;shadow:no`). Customize your map markers using Geoapify's [Icon API Playground](https://apidocs.geoapify.com/playground/icon/).
 - `show_privacy_notice` – Toggle to hide the privacy overlay text while keeping the interactive toggle.
 - `map_privacy_notice_text` – Custom copy for the overlay and accessibility hint.
 
@@ -60,10 +61,24 @@ All plugin options live under `params` in `plugin.json` and are exposed in Micro
 2. Generate an API key (the free tier covers 3,000 static map requests/day).
 3. Paste the key into the Micro.blog plugin configuration.
 4. Optional: customise the light/dark styles using any Geoapify static map style slug. Available styles include:
-   - **Vector styles** (customizable): `osm-bright` (default), `osm-bright-grey`, `osm-bright-smooth`, `osm-liberty`, `klokantech-basic`, `positron`, `dark-matter`, `toner`, `toner-grey`
-   - **Raster style**: `osm-carto`
+   - **Raster style**: `osm-carto` (default, classic OpenStreetMap look)
+   - **Vector styles** (customizable): `osm-bright`, `osm-bright-grey`, `osm-bright-smooth`, `osm-liberty`, `klokantech-basic`, `positron`, `dark-matter`, `toner`, `toner-grey`
 
    See the [Geoapify Static Maps API documentation](https://www.geoapify.com/static-maps-api/) for the complete list.
+
+## Custom Markers
+
+You can customize the map markers by adjusting the `map_marker_params` setting. Use the [Geoapify Icon API Playground](https://apidocs.geoapify.com/playground/icon/) to experiment with different marker styles and generate custom parameters.
+
+The format is semicolon-separated key:value pairs, for example:
+- `type:awesome;color:red;size:60;shadow:no` (default)
+- `type:material;color:blue;size:80;shadow:yes`
+
+Common parameters include:
+- `type` – Icon type (`awesome`, `material`, etc.)
+- `color` – Marker color (hex color or name like `red`, `blue`)
+- `size` – Marker size (numeric value like `60`, `80`)
+- `shadow` – Whether to show shadow (`yes` or `no`)
 
 ## Zoom Level Cheatsheet
 
