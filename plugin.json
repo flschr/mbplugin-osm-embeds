@@ -13,7 +13,7 @@
     },
     {
       "field": "params.map_privacy_notice_text",
-      "label": "Privacy notice text (if empty, button will be shown)",
+      "label": "Privacy banner text)",
       "type": "string",
       "default": ""
     },
