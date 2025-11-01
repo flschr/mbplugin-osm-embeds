@@ -228,7 +228,7 @@
           pointer-events: none;
           border-radius: inherit;
         }
-        .mb-map-preview label:hover::before {
+        .mb-map-preview:not(.mb-map-preview--with-button) label:hover::before {
           background: rgba(0, 0, 0, 0.15);
         }
         .mb-map-preview picture,
@@ -336,7 +336,7 @@
       {{- if $hasPreview -}}
         {{- /* With API key: show preview with toggle */ -}}
         <input type="checkbox" id="{{ $toggleID }}" class="mb-map-toggle" aria-describedby="{{ $hintID }}" />
-        <div class="mb-map-preview{{ if $showPrivacyNotice }} mb-map-preview--with-notice{{ end }}">
+        <div class="mb-map-preview{{ if $showPrivacyNotice }} mb-map-preview--with-notice{{ end }}{{ if $showButton }} mb-map-preview--with-button{{ end }}">
           <label for="{{ $toggleID }}">
             <picture>
               <source media="(prefers-color-scheme: dark)" srcset="{{ $darkPreview | safeURL }} 1x, {{ $darkPreview2x | safeURL }} 2x" />
