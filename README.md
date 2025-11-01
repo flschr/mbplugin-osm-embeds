@@ -96,7 +96,7 @@ Common parameters include:
 
 ## Author
 
-Created by **OpenAI (ChatGPT)**. Contributions and suggestions are welcome via pull request.
+Created by **René Fischer**. Contributions and suggestions are welcome via pull request.
 
 ## Changelog
 
