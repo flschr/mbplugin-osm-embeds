@@ -5,11 +5,6 @@
 {{- $state := newScratch -}}
 {{- $state.Set "hasError" false -}}
 {{- $state.Set "errorMessage" "" -}}
-{{- $state.Set "latValue" 0.0 -}}
-{{- $state.Set "lngValue" 0.0 -}}
-{{- $state.Set "latFormatted" "0.000000" -}}
-{{- $state.Set "lngFormatted" "0.000000" -}}
-{{- $state.Set "osmLink" "" -}}
 {{- $state.Set "zoomInt" 14 -}}
 {{- $state.Set "zoomString" "14" -}}
 {{- $locRaw := .Get "loc" -}}
@@ -95,25 +90,17 @@
   {{- $isFeed := in (slice "rss" "json" "atom") $mediaSubType -}}
 
   {{- /* UI and preview configuration */ -}}
-  {{- $uiConfig := newScratch -}}
-  {{- $uiConfig.Set "apiKey" "" -}}
+  {{- $apiKey := "" -}}
   {{- with .Site.Params.map_preview_api_key -}}
-    {{- $uiConfig.Set "apiKey" (trim (printf "%v" .) " ") -}}
+    {{- $apiKey = trim (printf "%v" .) " " -}}
   {{- end -}}
-  {{- $apiKey := $uiConfig.Get "apiKey" -}}
   {{- $hasPreview := and (ne $apiKey "") (ne $apiKey "<nil>") -}}
-  {{- $uiConfig.Set "styleLight" "osm-carto" -}}
-  {{- $styleLightCandidate := printf "%v" (or .Site.Params.map_preview_style_light "osm-carto") -}}
-  {{- if ne (trim $styleLightCandidate " ") "" -}}
-    {{- $uiConfig.Set "styleLight" $styleLightCandidate -}}
-  {{- end -}}
-  {{- $styleLight := $uiConfig.Get "styleLight" -}}
-  {{- $uiConfig.Set "styleDark" "osm-carto" -}}
-  {{- $styleDarkCandidate := printf "%v" (or .Site.Params.map_preview_style_dark "osm-carto") -}}
-  {{- if ne (trim $styleDarkCandidate " ") "" -}}
-    {{- $uiConfig.Set "styleDark" $styleDarkCandidate -}}
-  {{- end -}}
-  {{- $styleDark := $uiConfig.Get "styleDark" -}}
+
+  {{- $styleLightCandidate := trim (printf "%v" (or .Site.Params.map_preview_style_light "osm-carto")) " " -}}
+  {{- $styleLight := cond (ne $styleLightCandidate "") $styleLightCandidate "osm-carto" -}}
+
+  {{- $styleDarkCandidate := trim (printf "%v" (or .Site.Params.map_preview_style_dark "osm-carto")) " " -}}
+  {{- $styleDark := cond (ne $styleDarkCandidate "") $styleDarkCandidate "osm-carto" -}}
 
   {{- /* Marker configuration */ -}}
   {{- $markerParams := printf "%v" (or .Site.Params.map_marker_params "type:awesome;color:red;size:60;shadow:no") -}}
@@ -127,25 +114,23 @@
   {{- $darkPreview2x := printf "%s?style=%s&width=1536&height=864&center=lonlat:%s,%s&zoom=%s&marker=%s&apiKey=%s" $previewBase (urlquery $styleDark) $lngFormatted $latFormatted $zoomString (urlquery $markerQuery) $apiKey -}}
 
   {{- /* Privacy notice configuration */ -}}
-  {{- $uiConfig.Set "showPrivacyNotice" true -}}
+  {{- $showPrivacyNotice := true -}}
   {{- if isset .Site.Params "show_privacy_notice" -}}
     {{- $noticeRaw := lower (trim (printf "%v" .Site.Params.show_privacy_notice) " ") -}}
     {{- if in (slice "false" "0" "no") $noticeRaw -}}
-      {{- $uiConfig.Set "showPrivacyNotice" false -}}
+      {{- $showPrivacyNotice = false -}}
     {{- end -}}
   {{- end -}}
-  {{- $showPrivacyNotice := $uiConfig.Get "showPrivacyNotice" -}}
   {{- $privacyNoticeText := printf "%v" (or .Site.Params.map_privacy_notice_text "We only load OpenStreetMap after you interact with the preview.") -}}
 
   {{- /* Button configuration */ -}}
-  {{- $uiConfig.Set "showButton" true -}}
+  {{- $showButton := true -}}
   {{- if isset .Site.Params "show_map_button" -}}
     {{- $buttonRaw := lower (trim (printf "%v" .Site.Params.show_map_button) " ") -}}
     {{- if in (slice "false" "0" "no") $buttonRaw -}}
-      {{- $uiConfig.Set "showButton" false -}}
+      {{- $showButton = false -}}
     {{- end -}}
   {{- end -}}
-  {{- $showButton := $uiConfig.Get "showButton" -}}
   {{- $buttonText := printf "%v" (or .Site.Params.map_button_text "Interactive Map") -}}
 
   {{- /* Feed output uses only the static preview or a fallback link */ -}}
@@ -184,7 +169,6 @@
     {{- $mapCount := add (or ($page.Scratch.Get "mb-map-count") 0) 1 -}}
     {{- $page.Scratch.Set "mb-map-count" $mapCount -}}
     {{- $toggleID := printf "mb-map-toggle-%d" $mapCount -}}
-    {{- $hintID := printf "%s-hint" $toggleID -}}
 
     {{- if not ($page.Scratch.Get "mb-map-style-loaded") -}}
       {{- $page.Scratch.Set "mb-map-style-loaded" true -}}
@@ -340,7 +324,7 @@
     <div class="mb-map-wrapper">
       {{- if $hasPreview -}}
         {{- /* With API key: show preview with toggle */ -}}
-        <input type="checkbox" id="{{ $toggleID }}" class="mb-map-toggle" aria-describedby="{{ $hintID }}" />
+        <input type="checkbox" id="{{ $toggleID }}" class="mb-map-toggle" />
         <div class="mb-map-preview{{ if $showPrivacyNotice }} mb-map-preview--with-notice{{ end }}{{ if $showButton }} mb-map-preview--with-button{{ end }}">
           <label for="{{ $toggleID }}">
             <picture>
